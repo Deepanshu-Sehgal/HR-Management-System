@@ -1,0 +1,24 @@
+:root {
+  --cyan-mix-1: #62c9cd;
+  --cyan-mix-2: #298487;
+  --green-mix-1: #1c982e;
+  --green-mix-2: #0e4f17;
+  --red-mix-1: #ff3d3d;
+  --red-mix-: #992525;
+  --yellow-mix-1: #dac400;
+  --yellow-mix-2: #d0bb00;
+  --violet-mix-1: #783fed;
+  --violet-mix-2: #442487;
+  --white: #ffffff;
+  --black: #121212;
+  --grey: #e5e5e5;
+  --darkgrey: #a4a4a4;
+  font-family: "Nunito", sans-serif;
+}
+
+body {
+
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}

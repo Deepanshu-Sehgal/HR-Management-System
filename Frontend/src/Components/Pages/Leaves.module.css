@@ -1,0 +1,207 @@
+.container {
+  padding: 10px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.leftSectionNav select {
+  margin-right: 20px;
+  padding: 10px;
+  border: 2px solid var(--violet-mix-1);
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+}
+
+.rightSectionNav {
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  height: 100vh;
+}
+
+.leftSection {
+  flex: 0 0 70%;
+
+  margin-right: 15px;
+}
+
+.rightSection {
+  flex: 0 0 30%;
+  height: 65vh;
+  margin-right: 20px;
+  border-radius: 15px;
+  box-shadow: 5px 10px 20px var(--darkgrey);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--violet-mix-1) white;
+}
+
+.statusDropdown {
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+.designation {
+  color: grey;
+  font-size: 12px;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 15px;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.searchInput {
+  padding: 10px 15px 10px 45px;
+  margin-right: 20px;
+  border: 2px solid var(--violet-mix-1);
+  border-radius: 25px;
+  font-size: 14px;
+  outline: none;
+}
+
+.addButton {
+  background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+  color: white;
+  border: none;
+  padding: 15px 20px;
+  cursor: pointer;
+  border-radius: 30px;
+  font-size: 14px;
+}
+
+.tableContainer {
+  border-radius: 15px;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 12px;
+}
+
+.pending {
+  color: #ffda6b;
+}
+
+.approved {
+  color: green;
+}
+
+.rejected {
+  color: red;
+}
+
+.docIcon {
+  cursor: pointer;
+}
+
+.calendar {
+  padding-bottom: 20px;
+}
+
+.calendarTitle {
+  font-size: 20px;
+  background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  color: white;
+  border-radius: 15px 15px 0px 0px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.calendarControls {
+  display: flex;
+  padding: 10px;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.dateWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.calendarInputWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.customCalendarIcon {
+  position: absolute;
+  top: 40%;
+  right: 8%;
+  bottom: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.calendarDateInput {
+  padding: 10px 28px;
+  position: relative;
+  font-size: 15px;
+  background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+  border: 1px solid #ccc;
+  border-radius: 40px;
+  color: white;
+  z-index: -10;
+}
+
+.calendarDateInput::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.todayButton {
+  color: black;
+  padding: 10px 30px;
+  margin: 5px;
+  border-radius: 40px;
+  border: 1px solid var(--violet-mix-2);
+  cursor: pointer;
+  font-size: 15px;
+  background-color: white;
+}
+
+.calendarDate {
+  border: 1px solid white;
+  border-radius: 40px;
+  padding: 10px 30px;
+  background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+  color: white;
+  font-size: 15px;
+}
+
+.calendarEntry {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-top: 0;
+  padding-left: 20px;
+}
+
+.profileImage {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}

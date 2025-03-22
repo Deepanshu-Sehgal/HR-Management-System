@@ -1,0 +1,104 @@
+/* By Paras */
+.popupcomp {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #ff0000;
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  z-index: 20;
+  left: -2%;
+  top: 80%;
+  border-radius: 8px;
+  box-shadow: 0px 1px 10.3px 1px #13131314;
+}
+
+.popupcomp div {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19.1px;
+  text-align: left;
+  color: #121212;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.employeepop {
+  width: 5rem;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #ff0000;
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  z-index: 20;
+  left: -4rem;
+  top: 80%;
+  border-radius: 8px;
+  box-shadow: 0px 1px 10.3px 1px #13131314;
+}
+
+.employeepop div {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19.1px;
+  text-align: left;
+  color: #121212;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.attendancepop {
+  width: 10rem;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #ff0000;
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  z-index: 20;
+  left: 2%;
+  top: 80%;
+  border-radius: 8px;
+  box-shadow: 0px 1px 10.3px 1px #13131314;
+}
+
+.attendancepop div {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19.1px;
+  text-align: left;
+  color: #121212;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.leavepop {
+  width: 10rem;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #ff0000;
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  z-index: 20;
+  left: 2%;
+  top: 80%;
+  border-radius: 8px;
+  box-shadow: 0px 1px 10.3px 1px #13131314;
+}
+
+.leavepop div {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19.1px;
+  text-align: left;
+  color: #121212;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e5e5;
+}

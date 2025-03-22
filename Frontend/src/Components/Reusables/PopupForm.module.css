@@ -1,0 +1,189 @@
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popupForm {
+  background-color: white;
+  padding: 0;
+  border-radius: 25px;
+  width: 70%;
+  max-width: 95%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  max-height: 80vh;
+  border: none;
+}
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+  padding: 15px;
+  margin: 0;
+}
+
+h2 {
+  margin: 0;
+  text-align: center;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  padding: 20px;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.inputField,
+.inputFieldWithIcon {
+  width: 100%; /* Set both to 100% for consistency */
+  padding: 12px; /* Same padding for both */
+  border: 1px solid var(--violet-mix-2);
+  border-radius: 10px;
+  font-size: 16px;
+  box-sizing: border-box; /* Ensure padding is included in width */
+  transition: border-color 0.3s ease;
+}
+
+.inputWrapper label {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  font-size: 14px;
+  color: #777;
+  transition: top 0.3s ease, font-size 0.3s ease, color 0.3s ease;
+}
+
+.inputField:focus {
+  border-color: var(--violet-mix-1);
+  outline: none;
+}
+
+.inputField:focus + label,
+.inputField:not(:placeholder-shown) + label {
+  top: -6px;
+  font-size: 12px;
+  color: var(--violet-mix-1);
+  background-color: #ffffff;
+  padding: 0 4px;
+  border-radius: 4px;
+  left: 8px;
+}
+/* Add a similar rule for inputFieldWithIcon if needed */
+.inputFieldWithIcon:focus + label,
+.inputFieldWithIcon:not(:placeholder-shown) + label {
+  top: -6px;
+  font-size: 12px;
+  color: var(--violet-mix-1);
+  background-color: #ffffff;
+  padding: 0 4px;
+  border-radius: 4px;
+  left: 8px;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}
+
+.popupButton {
+  margin-left: 10px;
+  padding: 10px 25px;
+  width: 20%;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--darkgrey);
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+.inputWithIcon {
+  position: relative;
+  width: 100%;
+}
+.uploadIcon {
+  position: absolute;
+
+  right: 10px; /* Align the icon to the right */
+  top: 50%;
+  transform: translateY(-50%); /* Vertically center the icon */
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.popupButton:hover {
+  background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+}
+.requiredAsterisk {
+  color: red; /* Color of the asterisk */
+  margin-left: 2px; /* Space between the label and the asterisk */
+}
+.closeIcon {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+.inputWithIcon {
+  position: relative;
+  width: 100%;
+}
+
+.uploadIcon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.dropdown {
+  background-color: red;
+}
+
+.dropdownOptions {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  z-index: 10;
+  width: 100%;
+  height: 5rem;
+  overflow-y: scroll;
+}
+
+.optionItem {
+  padding: 8px 12px; /* Padding for dropdown items */
+  cursor: pointer; /* Cursor style */
+}
+
+.optionItem:hover {
+  background-color: #f1f1f1; /* Highlight on hover */
+}
+.calendarDateInput::-webkit-calendar-picker-indicator {
+  display: none;
+}

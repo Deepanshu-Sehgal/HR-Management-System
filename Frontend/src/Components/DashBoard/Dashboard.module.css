@@ -1,0 +1,146 @@
+.dashboardLayout {
+  display: flex;
+  height: 100vh; /* Ensure the dashboard takes the full viewport height */
+  width: 100%;
+}
+
+.leftBar {
+  position: absolute;
+  left: 0;
+  width: 8px;
+  height: 100%;
+}
+
+.active .leftBar {
+  display: block;
+}
+
+.active {
+  font-weight: bold;
+  color: var(--black);
+}
+
+.sidebar {
+  width: 210px;
+  border: 1px solid var(--grey);
+  padding: 30px;
+  height: 100vh;
+}
+
+.logo1 {
+  display: flex;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuSection {
+  margin-bottom: 15px;
+  padding-top: 20px;
+}
+
+.menuHeading {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--darkgrey);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  color: var(--black);
+  text-decoration: none;
+}
+
+.icon {
+  margin-right: 10px;
+}
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid var(--grey);
+  padding: 20px;
+  margin-bottom: 20px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.headerIcons {
+  display: flex;
+  align-items: center;
+}
+
+.headerIcons .icon {
+  margin-right: 20px;
+}
+
+.profile {
+  position: relative;
+}
+
+.profileIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #fff;
+  display: none;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 180px;
+  padding: 0;
+  z-index: 10;
+}
+
+.profile:hover .dropdown {
+  display: block;
+}
+
+.logout {
+  border: none;
+  background-color: white;
+  cursor: pointer;
+  font-size: 15px;
+  color: black;
+}
+
+.dropdown .divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 0;
+}
+
+.content {
+  flex-grow: 1;
+  margin: 10px;
+  padding: 10px;
+  width: 98%;
+  min-height: calc(100vh - 200px);
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.logoutLink {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 12px 15px;
+  font-size: 14px;
+}
+.logoutLink:hover {
+  background-color: #f0f0f0;
+}

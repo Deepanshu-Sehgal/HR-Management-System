@@ -1,0 +1,81 @@
+/* Overlay for popup */
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popupContainer {
+  background-color: white;
+  width: 50%;
+  padding-top: 0;
+  padding-bottom: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* Popup header styles */
+.popupHeader {
+  background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+  border-radius: 15px 15px 0 0;
+  padding: 15px 0;
+  color: white;
+  font-size: 20px;
+  width: 100%;
+  margin: 0;
+  position: relative;
+  top: 0;
+}
+/* Popup body styles */
+.popupBody {
+  padding: 15px 0;
+  font-size: 18px;
+}
+
+/* Footer for the buttons */
+.popupFooter {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Cancel button styles */
+.cancelButton {
+  background: white;
+  border: 1px solid var(--violet-mix-1);
+  color: black;
+  font-size: 20px;
+  padding: 10px 50px;
+  border-radius: 30px;
+  cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Confirm (Log Out) button styles */
+.confirmButton {
+    background: white;
+    border: 1px solid var(--violet-mix-1);
+    color: black;
+    font-size: 20px;
+    padding: 10px 50px;
+    border-radius: 30px;
+    cursor: pointer;
+      transition: background-color 0.3s ease;
+}
+
+.confirmButton:hover {
+    background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+    color: white;
+}
+.cancelButton:hover {
+    background: linear-gradient(180deg, #783fed 0%, #442487 100%);
+    color: white;
+}
