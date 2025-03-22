@@ -30,8 +30,7 @@ An end-to-end Human Resource Management System developed using the MERN stack (M
 ---
 
 ## 📂 Project Structure
-
-\`\`\`
+```
 hr-management-system/
 │
 ├── backend/                # Express.js REST API
@@ -48,7 +47,7 @@ hr-management-system/
 ├── .env                    # Environment Variables
 ├── package.json
 └── README.md
-\`\`\`
+```
 
 ---
 
@@ -56,26 +55,26 @@ hr-management-system/
 
 ### 1️⃣ Clone the Repository
 
-\`\`\`bash
+```bash
 git clone https://github.com/YourUsername/hr-management-system.git
 cd hr-management-system
-\`\`\`
+```
 
 ### 2️⃣ Backend Setup
 
-\`\`\`bash
+```bash
 cd backend
 npm install
 npm start
-\`\`\`
+```
 
 ### 3️⃣ Frontend Setup
 
-\`\`\`bash
+```bash
 cd frontend
 npm install
 npm start
-\`\`\`
+```
 
 ### 4️⃣ Environment Variables
 
@@ -83,16 +82,16 @@ Create \`.env\` files in both \`frontend/\` and \`backend/\` directories:
 
 #### 🔐 Backend \`.env\`
 
-\`\`\`
+```
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
-\`\`\`
+```
 
 #### 🌐 Frontend \`.env\`
 
-\`\`\`
+```
 REACT_APP_API_URL=http://localhost:5000/api
-\`\`\`
+```
 
 ---
 
