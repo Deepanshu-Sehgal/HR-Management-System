@@ -4,8 +4,6 @@ An end-to-end Human Resource Management System developed using the MERN stack (M
 
 ---
 
-
-
 ## 🚀 Features
 
 - 🔐 Role-Based Authentication (Admin, HR, Employee)
