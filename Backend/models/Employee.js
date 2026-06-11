@@ -2,6 +2,8 @@
 
 const mongoose = require("mongoose");
 
+// Define the Employee schema
+
 const EmployeeSchema = new mongoose.Schema({
   employeeName: {
     type: String,
@@ -61,6 +63,7 @@ const EmployeeSchema = new mongoose.Schema({
 // You can also add an index if you expect to search by candidateName often
 EmployeeSchema.index({ employeeName: 1 });
 
+// Create the Employee model from the schema
 const Employee = mongoose.model("Employee", EmployeeSchema);
 
 module.exports = Employee;
