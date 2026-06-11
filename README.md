@@ -1,7 +1,9 @@
 # 💼 HR Management System (MERN Stack)
 
 An end-to-end Human Resource Management System developed using the MERN stack (MongoDB, Express.js, React.js, Node.js). The system simplifies HR operations like employee management, attendance tracking, leave handling, and payroll management — all in one place.
+
 ---
+
 ## 🚀 Features
 
 - 🔐 Role-Based Authentication (Admin, HR, Employee)
