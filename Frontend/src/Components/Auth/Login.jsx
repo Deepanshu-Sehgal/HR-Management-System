@@ -1,11 +1,3 @@
-/*
- * File: Frontend/src/Components/Auth/Login.jsx
- * Purpose: Login form component. Handles user input, toggling password
- * visibility, and submits credentials to the backend auth endpoint.
- * Notes: Stores token in localStorage on success; consider moving token
- * handling into a dedicated auth service for better testability.
- */
-
 import React, { useState } from "react";
 import login from "./Registration.module.css";
 import { Logo, EyeOpen, EyeHidden, Onboard } from "../../assets";
@@ -47,8 +39,6 @@ const Login = () => {
 
   return (
     <div className={login.registrationPage}>
-      {" "}
-      {/* Use the imported style */}
       <div className={login.registrationContainer}>
         <div className={login.logo}>
           <img src={Logo} alt="Logo" className={login.logoImage} />

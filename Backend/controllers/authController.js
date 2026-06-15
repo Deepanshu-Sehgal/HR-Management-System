@@ -1,11 +1,3 @@
-/*
- * File: Backend/controllers/authController.js
- * Purpose: Handler functions for authentication-related routes (register, login).
- * Exports: `registerUser`, `loginUser` — both are async Express handlers.
- * Notes: Validation and error handling are minimal here; keep authentication
- * strategies and token generation centralized (see `utils/generateToken.js`).
- */
-
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
@@ -43,7 +35,7 @@ exports.registerUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-//login
+
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
