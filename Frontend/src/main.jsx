@@ -1,9 +1,3 @@
-/*
- * File: Frontend/src/main.jsx
- * Purpose: React application bootstrap. Renders the root `App` component and
- * wraps it with the Redux `Provider` to expose the application store.
- */
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";

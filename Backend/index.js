@@ -1,11 +1,3 @@
-/*
- * File: Backend/index.js
- * Purpose: Application entry point — sets up environment, connects to the DB,
- * configures middleware (CORS, JSON body parsing, static file serving),
- * and mounts the API route handlers. Keep this file minimal: move business
- * logic into `controllers/` and data models into `models/`.
- */
-
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
@@ -39,7 +31,7 @@ app.use("/api/resume/:foldername/:filename", (req, res) => {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true }); // Create the uploads directory
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 app.use("/api/auth", authRoutes);
