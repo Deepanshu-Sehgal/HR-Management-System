@@ -1,3 +1,11 @@
+/*
+ * File: Frontend/src/Components/Auth/Registration.jsx
+ * Purpose: Registration form component. Collects user details, validates
+ * password confirmation, and sends a sign-up request to the backend.
+ * Notes: Consider centralizing API calls in a service module and showing
+ * inline validation messages instead of alerts.
+ */
+
 import React, { useState } from "react";
 import register from "./Registration.module.css";
 import { useNavigate ,Link} from "react-router-dom";

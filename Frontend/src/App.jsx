@@ -1,3 +1,10 @@
+/*
+ * File: Frontend/src/App.jsx
+ * Purpose: Defines the client-side routes and application layout. This file
+ * wires top-level routes for authentication (registration/login) and the
+ * dashboard area (candidates, employees, attendance, leaves).
+ */
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Registration from "./Components/Auth/Registration";

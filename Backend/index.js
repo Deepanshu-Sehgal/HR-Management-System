@@ -1,3 +1,11 @@
+/*
+ * File: Backend/index.js
+ * Purpose: Application entry point — sets up environment, connects to the DB,
+ * configures middleware (CORS, JSON body parsing, static file serving),
+ * and mounts the API route handlers. Keep this file minimal: move business
+ * logic into `controllers/` and data models into `models/`.
+ */
+
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
