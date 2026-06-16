@@ -3,7 +3,7 @@ const Employee = require("../models/Employee");
 const path = require("path");
 const fs = require("fs");
 
-// Create a new candidate record and also store a related employee entry
+
 exports.createCandidate = async (req, res) => {
   console.log(req.body);
   try {
@@ -11,7 +11,7 @@ exports.createCandidate = async (req, res) => {
     const imageFile = req.files["image"] ? req.files["image"][0] : null;
     const { candidateName, email, phoneNumber, department, experience } = req.body;
 
-    // Validate required file uploads
+    
     if (!resumeFile) {
       return res.status(400).json({ message: "Resume is required" });
     }
@@ -24,7 +24,7 @@ exports.createCandidate = async (req, res) => {
     const imageFileName = `${Date.now()}-${imageFile.originalname}`;
     const imagePath = path.join(__dirname, "..", "uploads", imageFileName);
 
-    // Move uploaded files from temporary multer storage to the uploads folder
+    
     fs.renameSync(resumeFile.path, resumePath);
     fs.renameSync(imageFile.path, imagePath);
 
@@ -43,7 +43,7 @@ exports.createCandidate = async (req, res) => {
       image: imageFileName,
     });
 
-    // Automatically add a matching employee record for the new candidate
+    
     const newEmployee = new Employee({
       employeeName: candidateName,
       email,
@@ -67,7 +67,7 @@ exports.createCandidate = async (req, res) => {
   }
 };
 
-// Retrieve candidates with optional filters for status and department
+
 exports.getCandidates = async (req, res) => {
   const status = req.body.status;
   const pos = req.body.department;
@@ -92,7 +92,7 @@ exports.getCandidates = async (req, res) => {
   }
 };
 
-// Delete candidate data from the database and remove associated resume file
+
 exports.deleteCandidate = async (req, res) => {
   const candidateId = req.params.id;
 
@@ -113,7 +113,7 @@ exports.deleteCandidate = async (req, res) => {
   }
 };
 
-// Update candidate status by ID
+
 exports.updateCandidate = async (req, res) => {
   const candidateId = req.params.id;
   console.log(req.body, "Body of the user");

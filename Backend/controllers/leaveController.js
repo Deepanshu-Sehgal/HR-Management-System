@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const Leave = require("../models/Leave");
 
-// Retrieve leave records with optional request body filters
+
 exports.getLeaveData = async (req, res) => {
   try {
     const body = req.body;
@@ -15,14 +15,14 @@ exports.getLeaveData = async (req, res) => {
   }
 };
 
-// Convert a YYYY-MM-DD date string to DD/MM/YYYY format
+
 function reverseDate(date) {
   if (!date) return "";
   const [year, month, day] = date.split("-");
   return `${day}/${month}/${year}`;
 }
 
-// Create a new leave request and save uploaded files to disk
+
 exports.createLeave = async (req, res) => {
   try {
     console.log(req.body);
@@ -72,7 +72,7 @@ exports.createLeave = async (req, res) => {
   }
 };
 
-// Update leave request data by ID
+
 exports.updateLeave = async (req, res) => {
   const leaveId = req.params.id;
   const body = req.body;
@@ -92,7 +92,7 @@ exports.updateLeave = async (req, res) => {
   }
 };
 
-// Filter leave records by arbitrary fields passed in the request body
+
 exports.filterbydate = async (req, res) => {
   try {
     const body = req.body;

@@ -1,4 +1,4 @@
-//by Paras
+
 
 const express = require("express");
 const router = express.Router();
@@ -16,7 +16,7 @@ const {
 
 
 
-// Configure multer storage for file upload handling
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Route to get all candidates
+
 router.post("/employeeleavefilterbystatus", getLeaveData);
 
 router.post(

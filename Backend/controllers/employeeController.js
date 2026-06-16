@@ -1,6 +1,6 @@
 const Employees = require("../models/Employee");
 
-// Retrieve employees, optionally filtered by department
+
 exports.getEmployees = async (req, res) => {
   console.log(req.body);
   const pos = req.body.department;
@@ -20,7 +20,7 @@ exports.getEmployees = async (req, res) => {
   }
 };
 
-// Delete an employee by their ID
+
 exports.deleteEmployees = async (req, res) => {
   const employeeId = req.params.id;
 
@@ -38,7 +38,7 @@ exports.deleteEmployees = async (req, res) => {
   }
 };
 
-// Update employee details by ID using the request body payload
+
 exports.updateEmployees = async (req, res) => {
   const employeeId = req.params.id;
   const body = req.body;

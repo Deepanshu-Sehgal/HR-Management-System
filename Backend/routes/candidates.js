@@ -10,33 +10,33 @@ const {
   updateCandidate,
 } = require("../controllers/candidateController");
 
-// Configure multer storage for file uploads
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Save uploaded files into uploads directory
+    cb(null, "uploads/"); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Use timestamped file names
+    cb(null, Date.now() + path.extname(file.originalname)); 
   },
 });
 
 const upload = multer({ storage });
 
-// Create a new candidate with resume and image upload
+
 router.post(
   "/candidates",
   upload.fields([{ name: "resume" }, { name: "image" }]),
   createCandidate
 );
 
-// Update candidate status by ID
+
 router.put("/candidates/:id", updateCandidate);
 
-// Fetch candidate records with optional filters
+
 router.post("/candidates/fetch", getCandidates);
 router.get("/candidates", getCandidates);
 
-// Download a resume file by filename
+
 router.get("/download-resume/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, `../uploads/${filename}`);
@@ -58,6 +58,6 @@ router.get("/download-resume/:filename", (req, res) => {
   });
 });
 
-// Delete a candidate by ID
+
 router.delete("/candidates/:id", deleteCandidate);
 module.exports = router;

@@ -1,8 +1,8 @@
-// by Paras
+
 
 const mongoose = require("mongoose");
 
-// Define the Employee schema for all employee records
+
 const EmployeeSchema = new mongoose.Schema({
   employeeName: {
     type: String,
@@ -13,8 +13,8 @@ const EmployeeSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    unique: true, // Ensure unique email addresses
-    lowercase: true, // Normalize email formatting
+    unique: true, 
+    lowercase: true, 
     validate: {
       validator: function (v) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -59,7 +59,7 @@ const EmployeeSchema = new mongoose.Schema({
   },
 });
 
-// Index by employee name to optimize name searches
+
 EmployeeSchema.index({ employeeName: 1 });
 
 const Employee = mongoose.model("Employee", EmployeeSchema);
