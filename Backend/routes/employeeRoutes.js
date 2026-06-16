@@ -11,23 +11,25 @@ const {
   deleteEmployees,
 } = require("../controllers/employeeController");
 
-// Set up multer for disk storage
+// Configure multer storage; ready for future file uploads if needed
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Set the folder to save the uploaded files
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage });
 
+// Update employee record by ID
 router.put("/employee/:id", updateEmployees);
-// Route to get all candidates
+
+// Retrieve employees with optional department filtering
 router.get("/employee", getEmployees);
-//dnld
 router.post("/employee/filter", getEmployees);
-// Route to delete a candidate by ID
-router.delete("/employee/:id", deleteEmployees); // Add delete route
+
+// Delete an employee by ID
+router.delete("/employee/:id", deleteEmployees);
 module.exports = router;

@@ -1,35 +1,42 @@
-const path = require("path"); // Import path module
-const fs = require("fs"); // Import fs module
+const path = require("path");
+const fs = require("fs");
 const Leave = require("../models/Leave");
 
+// Retrieve leave records with optional request body filters
 exports.getLeaveData = async (req, res) => {
   try {
     const body = req.body;
     console.log(body, "status filtered data");
-    const leave = await Leave.find(req.body);
+    const leave = await Leave.find(body);
     res.status(200).json(leave);
   } catch (error) {
-    console.error("Error fetching candidates:", error);
+    console.error("Error fetching leave data:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// Convert a YYYY-MM-DD date string to DD/MM/YYYY format
 function reverseDate(date) {
   if (!date) return "";
   const [year, month, day] = date.split("-");
   return `${day}/${month}/${year}`;
 }
+
+// Create a new leave request and save uploaded files to disk
 exports.createLeave = async (req, res) => {
   try {
     console.log(req.body);
     console.log(req.files);
     const { name, department, leavedate1, leavedate2, reason } = req.body;
     let finalleavedate = leavedate1;
+
     if (finalleavedate != leavedate2) {
       finalleavedate = `${leavedate1} - ${leavedate2}`;
     }
-    console.log("hua");
+
     const resumeFile = req.files["resume"] ? req.files["resume"][0] : null;
     const imageFile = req.files["image"] ? req.files["image"][0] : null;
+
     if (!resumeFile) {
       return res.status(400).json({ message: "Resume is required" });
     }
@@ -39,7 +46,6 @@ exports.createLeave = async (req, res) => {
 
     const resumeFileName = `${Date.now()}-${resumeFile.originalname}`;
     const resumePath = path.join(__dirname, "..", "uploads", resumeFileName);
-
     const imageFileName = `${Date.now()}-${imageFile.originalname}`;
     const imagePath = path.join(__dirname, "..", "uploads", imageFileName);
 
@@ -48,46 +54,45 @@ exports.createLeave = async (req, res) => {
 
     const datee = new Date().toLocaleDateString();
     const newLeave = new Leave({
-      name: name,
-      department: department,
+      name,
+      department,
       leavedate: reverseDate(finalleavedate),
       date: datee,
-      reason: reason,
+      reason,
       status: "Pending",
       resume: resumeFileName,
       image: imageFileName,
     });
 
     await newLeave.save();
-    console.log("hua6");
     res.status(201).json({ message: "Leave saved successfully", resumePath });
   } catch (error) {
-    console.error("Error saving Leave:", error);
+    console.error("Error saving leave:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+// Update leave request data by ID
 exports.updateLeave = async (req, res) => {
-  console.log("hua");
-  const employeeId = req.params.id;
+  const leaveId = req.params.id;
   const body = req.body;
-  console.log(req.body, "empl name");
+  console.log(req.body, "leave update payload");
+
   try {
-    // Find the candidate to delete
-    const leave = await Leave.findById(employeeId);
+    const leave = await Leave.findById(leaveId);
     if (!leave) {
-      return res.status(404).json({ message: "Candidate not found" });
+      return res.status(404).json({ message: "Leave request not found" });
     }
-    console.log("huaaaa");
-    await Leave.findByIdAndUpdate(employeeId, body, { new: true });
-    console.log("cjlra");
-    res.status(200).json({ message: "Candidate updated successfully" });
+
+    await Leave.findByIdAndUpdate(leaveId, body, { new: true });
+    res.status(200).json({ message: "Leave request updated successfully" });
   } catch (error) {
-    console.error("Error updated candidate:", error);
+    console.error("Error updating leave request:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+// Filter leave records by arbitrary fields passed in the request body
 exports.filterbydate = async (req, res) => {
   try {
     const body = req.body;
@@ -95,7 +100,7 @@ exports.filterbydate = async (req, res) => {
     const leave = await Leave.find(body);
     res.status(200).json(leave);
   } catch (error) {
-    console.error("Error fetching candidates:", error);
+    console.error("Error fetching leave records:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

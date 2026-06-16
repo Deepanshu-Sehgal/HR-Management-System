@@ -2,14 +2,16 @@ const Candidate = require("../models/Candidate");
 const Employee = require("../models/Employee");
 const path = require("path");
 const fs = require("fs");
+
+// Create a new candidate record and also store a related employee entry
 exports.createCandidate = async (req, res) => {
   console.log(req.body);
   try {
     const resumeFile = req.files["resume"] ? req.files["resume"][0] : null;
     const imageFile = req.files["image"] ? req.files["image"][0] : null;
-    const { candidateName, email, phoneNumber, department, experience } =
-      req.body;
+    const { candidateName, email, phoneNumber, department, experience } = req.body;
 
+    // Validate required file uploads
     if (!resumeFile) {
       return res.status(400).json({ message: "Resume is required" });
     }
@@ -19,12 +21,13 @@ exports.createCandidate = async (req, res) => {
 
     const resumeFileName = `${Date.now()}-${resumeFile.originalname}`;
     const resumePath = path.join(__dirname, "..", "uploads", resumeFileName);
-
     const imageFileName = `${Date.now()}-${imageFile.originalname}`;
     const imagePath = path.join(__dirname, "..", "uploads", imageFileName);
 
+    // Move uploaded files from temporary multer storage to the uploads folder
     fs.renameSync(resumeFile.path, resumePath);
     fs.renameSync(imageFile.path, imagePath);
+
     const datee = new Date().toLocaleDateString();
     console.log(datee, "date");
 
@@ -39,6 +42,8 @@ exports.createCandidate = async (req, res) => {
       resume: resumeFileName,
       image: imageFileName,
     });
+
+    // Automatically add a matching employee record for the new candidate
     const newEmployee = new Employee({
       employeeName: candidateName,
       email,
@@ -54,36 +59,30 @@ exports.createCandidate = async (req, res) => {
 
     await newCandidate.save();
     await newEmployee.save();
-    res
-      .status(201)
-      .json({ message: "Candidate saved successfully", resumePath, imagePath });
+
+    res.status(201).json({ message: "Candidate saved successfully", resumePath, imagePath });
   } catch (error) {
     console.error("Error saving candidate:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+// Retrieve candidates with optional filters for status and department
 exports.getCandidates = async (req, res) => {
   const status = req.body.status;
   const pos = req.body.department;
   console.log(req.body);
   let candidates = null;
+
   try {
     if (status === "" && pos === "") {
       candidates = await Candidate.find();
-    } else if (status != "") {
-      candidates = await Candidate.find({
-        status: status,
-      });
-    } else if (pos != "") {
-      candidates = await Candidate.find({
-        department: pos,
-      });
+    } else if (status !== "") {
+      candidates = await Candidate.find({ status });
+    } else if (pos !== "") {
+      candidates = await Candidate.find({ department: pos });
     } else {
-      candidates = await Candidate.find({
-        status: status,
-        department: pos,
-      });
+      candidates = await Candidate.find({ status, department: pos });
     }
 
     res.status(200).json(candidates);
@@ -93,12 +92,12 @@ exports.getCandidates = async (req, res) => {
   }
 };
 
+// Delete candidate data from the database and remove associated resume file
 exports.deleteCandidate = async (req, res) => {
   const candidateId = req.params.id;
 
   try {
     const candidate = await Candidate.findById(candidateId);
-
     if (!candidate) {
       return res.status(404).json({ message: "Candidate not found" });
     }
@@ -107,7 +106,6 @@ exports.deleteCandidate = async (req, res) => {
     fs.unlinkSync(resumePath);
 
     await Candidate.findByIdAndDelete(candidateId);
-
     res.status(200).json({ message: "Candidate deleted successfully" });
   } catch (error) {
     console.error("Error deleting candidate:", error);
@@ -115,15 +113,15 @@ exports.deleteCandidate = async (req, res) => {
   }
 };
 
+// Update candidate status by ID
 exports.updateCandidate = async (req, res) => {
   const candidateId = req.params.id;
-  console.log("horaaa");
   console.log(req.body, "Body of the user");
   const updatedStatus = req.body.status;
-  console.log(updatedStatus, "Body of the user");
+  console.log(updatedStatus, "Updated status");
+
   try {
     const candidate = await Candidate.findById(candidateId);
-    console.log(candidateId, "candidate");
     if (!candidate) {
       return res.status(404).json({ message: "Candidate not found" });
     }
@@ -135,9 +133,9 @@ exports.updateCandidate = async (req, res) => {
     );
 
     console.log(updatedCandidate, "updated candidate");
-    res.status(200).json({ message: "Candidate deleted successfully" });
+    res.status(200).json({ message: "Candidate updated successfully" });
   } catch (error) {
-    console.error("Error deleting candidate:", error);
+    console.error("Error updating candidate:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

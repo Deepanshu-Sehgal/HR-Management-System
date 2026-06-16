@@ -2,8 +2,7 @@
 
 const mongoose = require("mongoose");
 
-// Define the Employee schema
-
+// Define the Employee schema for all employee records
 const EmployeeSchema = new mongoose.Schema({
   employeeName: {
     type: String,
@@ -15,10 +14,10 @@ const EmployeeSchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true, // Ensure unique email addresses
-    lowercase: true, // Normalize to lowercase
+    lowercase: true, // Normalize email formatting
     validate: {
       validator: function (v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); // Simple email validation regex
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       },
       message: (props) => `${props.value} is not a valid email!`,
     },
@@ -60,10 +59,8 @@ const EmployeeSchema = new mongoose.Schema({
   },
 });
 
-// You can also add an index if you expect to search by candidateName often
+// Index by employee name to optimize name searches
 EmployeeSchema.index({ employeeName: 1 });
 
-// Create the Employee model from the schema
 const Employee = mongoose.model("Employee", EmployeeSchema);
-
 module.exports = Employee;

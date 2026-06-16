@@ -7,59 +7,57 @@ const {
   createCandidate,
   getCandidates,
   deleteCandidate,
-  updateCandidate, // Import the function to get candidates
+  updateCandidate,
 } = require("../controllers/candidateController");
 
-// Set up multer for disk storage
+// Configure multer storage for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Set the folder to save the uploaded files
+    cb(null, "uploads/"); // Save uploaded files into uploads directory
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
+    cb(null, Date.now() + path.extname(file.originalname)); // Use timestamped file names
   },
 });
 
 const upload = multer({ storage });
 
-// Route to create a new candidate with resume upload
+// Create a new candidate with resume and image upload
 router.post(
   "/candidates",
   upload.fields([{ name: "resume" }, { name: "image" }]),
   createCandidate
 );
+
+// Update candidate status by ID
 router.put("/candidates/:id", updateCandidate);
-// Route to get all candidates
-router.post("/candidates/fetch", getCandidates); //by Paras
 
+// Fetch candidate records with optional filters
+router.post("/candidates/fetch", getCandidates);
 router.get("/candidates", getCandidates);
-//dnld
 
+// Download a resume file by filename
 router.get("/download-resume/:filename", (req, res) => {
   const filename = req.params.filename;
-  console.log("filename", filename);
   const filePath = path.join(__dirname, `../uploads/${filename}`);
-  console.log("Download route hit");
-  console.log("Attempting to download:", filePath); // Log the file path
 
   fs.stat(filePath, (err, stats) => {
     if (err) {
       console.error("File not found:", err);
       return res.status(404).send("File not found");
     }
-    console.log(`File size: ${stats.size} bytes`);
-    res.setHeader("Content-Type", "application/pdf"); // Set the correct content type
+
+    res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
     res.download(filePath, (err) => {
       if (err) {
         console.error("Error downloading file:", err);
         return res.status(err.status || 500).send("Error downloading file");
       }
-      console.log("File downloaded successfully");
     });
   });
 });
 
-// Route to delete a candidate by ID
-router.delete("/candidates/:id", deleteCandidate); // Add delete route
+// Delete a candidate by ID
+router.delete("/candidates/:id", deleteCandidate);
 module.exports = router;

@@ -16,13 +16,13 @@ const {
 
 
 
-// Set up multer for disk storage
+// Configure multer storage for file upload handling
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Set the folder to save the uploaded files
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to filename
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 

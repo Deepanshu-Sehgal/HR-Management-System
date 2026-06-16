@@ -1,39 +1,36 @@
 const Employees = require("../models/Employee");
-const path = require("path"); // Import path module
-const fs = require("fs"); // Import fs module
 
+// Retrieve employees, optionally filtered by department
 exports.getEmployees = async (req, res) => {
   console.log(req.body);
   const pos = req.body.department;
   let employees;
+
   try {
     if (pos === "") {
       employees = await Employees.find();
     } else {
-      employees = await Employees.find({
-        department: pos,
-      });
+      employees = await Employees.find({ department: pos });
     }
-    res.status(200).json(employees); // Return the candidates array
+
+    res.status(200).json(employees);
   } catch (error) {
-    console.error("Error fetching candidates:", error);
+    console.error("Error fetching employees:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-// Controller to delete a candidate by ID
+
+// Delete an employee by their ID
 exports.deleteEmployees = async (req, res) => {
   const employeeId = req.params.id;
 
   try {
-    // Find the candidate to delete
     const employee = await Employees.findById(employeeId);
-
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
-    // Delete the candidate from the database
-    await Employees.findByIdAndDelete(employeeId);
 
+    await Employees.findByIdAndDelete(employeeId);
     res.status(200).json({ message: "Employee deleted successfully" });
   } catch (error) {
     console.error("Error deleting employee:", error);
@@ -41,22 +38,22 @@ exports.deleteEmployees = async (req, res) => {
   }
 };
 
+// Update employee details by ID using the request body payload
 exports.updateEmployees = async (req, res) => {
   const employeeId = req.params.id;
   const body = req.body;
-  console.log(employeeId, "empl name");
+  console.log(employeeId, "employee id");
+
   try {
-    // Find the candidate to delete
     const employee = await Employees.findById(employeeId);
     if (!employee) {
-      return res.status(404).json({ message: "Candidate not found" });
+      return res.status(404).json({ message: "Employee not found" });
     }
 
     await Employees.findByIdAndUpdate(employeeId, body, { new: true });
-    console.log("cjlra");
-    res.status(200).json({ message: "Candidate updated successfully" });
+    res.status(200).json({ message: "Employee updated successfully" });
   } catch (error) {
-    console.error("Error updated candidate:", error);
+    console.error("Error updating employee:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

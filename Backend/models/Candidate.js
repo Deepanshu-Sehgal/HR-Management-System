@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Candidate schema defines the structure for candidate documents
 const candidateSchema = new mongoose.Schema({
   candidateName: {
     type: String,
@@ -11,10 +12,10 @@ const candidateSchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true, // Ensure unique email addresses
-    lowercase: true, // Normalize to lowercase
+    lowercase: true, // Normalize to lowercase before saving
     validate: {
       validator: function (v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); // Simple email validation regex
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       },
       message: (props) => `${props.value} is not a valid email!`,
     },
@@ -36,11 +37,11 @@ const candidateSchema = new mongoose.Schema({
   },
   resume: {
     type: String,
-    required: true, // Ensure a resume is provided
+    required: true, // Resume file name stored in uploads directory
   },
   image: {
     type: String,
-    required: true, // Ensure a resume is provided
+    required: true, // Image file name stored in uploads directory
   },
   status: {
     type: String,
@@ -52,9 +53,8 @@ const candidateSchema = new mongoose.Schema({
   },
 });
 
-// You can also add an index if you expect to search by candidateName often
+// Index candidate name for faster searches if needed
 candidateSchema.index({ candidateName: 1 });
 
 const Candidate = mongoose.model("Candidate", candidateSchema);
-
 module.exports = Candidate;
