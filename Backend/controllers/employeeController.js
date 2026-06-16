@@ -1,15 +1,17 @@
 const path = require("path");
 const fs = require("fs");
 const Employees = require("../models/Employee");
+const Candidate = require("../models/Candidate");
+const Leave = require("../models/Leave");
 
 
 exports.getEmployees = async (req, res) => {
   console.log(req.body);
-  const pos = req.body.department;
+  const pos = req.body?.department;
   let employees;
 
   try {
-    if (pos === "") {
+    if (!pos) {
       employees = await Employees.find();
     } else {
       employees = await Employees.find({ department: pos });
