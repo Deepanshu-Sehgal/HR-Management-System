@@ -8,6 +8,14 @@ import Candidates from "./Components/Pages/Candidates";
 import Employees from "./Components/Pages/Employees";
 import Attendance from "./Components/Pages/Attendance";
 import Leaves from "./Components/Pages/Leaves";
+import Departments from "./Components/Pages/Departments";
+import PerformanceReviews from "./Components/Pages/PerformanceReviews";
+import Payroll from "./Components/Pages/Payroll";
+import Recruitment from "./Components/Pages/Recruitment";
+import Announcements from "./Components/Pages/Announcements";
+import Documents from "./Components/Pages/Documents";
+import AttendanceAnalytics from "./Components/Pages/AttendanceAnalytics";
+import Reports from "./Components/Pages/Reports";
 
 function App() {
   return (
@@ -25,6 +33,14 @@ function App() {
           <Route path="employees" element={<Employees />} />
           <Route path="attendance" element={<Attendance />} />
           <Route path="leaves" element={<Leaves />} />
+          <Route path="departments" element={<Departments />} />
+          <Route path="performance" element={<PerformanceReviews />} />
+          <Route path="payroll" element={<Payroll />} />
+          <Route path="recruitment" element={<Recruitment />} />
+          <Route path="announcements" element={<Announcements />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="attendance-analytics" element={<AttendanceAnalytics />} />
+          <Route path="reports" element={<Reports />} />
         </Route>
       </Routes>
     </Router>
