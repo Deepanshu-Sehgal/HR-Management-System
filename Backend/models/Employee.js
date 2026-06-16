@@ -45,6 +45,22 @@ const EmployeeSchema = new mongoose.Schema({
   task: {
     type: String,
   },
+  attendanceRecords: [
+    {
+      date: {
+        type: String,
+      },
+      checkIn: {
+        type: String,
+      },
+      checkOut: {
+        type: String,
+      },
+      status: {
+        type: String,
+      },
+    },
+  ],
   status: {
     type: String,
     required: true,

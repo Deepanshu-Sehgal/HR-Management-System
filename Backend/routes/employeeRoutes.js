@@ -6,9 +6,11 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const {
+  createEmployee,
   updateEmployees,
   getEmployees,
   deleteEmployees,
+  addAttendanceRecord,
 } = require("../controllers/employeeController");
 
 
@@ -24,8 +26,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
+router.post("/employee", upload.single("image"), createEmployee);
 router.put("/employee/:id", updateEmployees);
-
+router.post("/employee/:id/attendance", addAttendanceRecord);
 
 router.get("/employee", getEmployees);
 router.post("/employee/filter", getEmployees);

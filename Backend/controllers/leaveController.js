@@ -84,7 +84,12 @@ exports.updateLeave = async (req, res) => {
       return res.status(404).json({ message: "Leave request not found" });
     }
 
-    await Leave.findByIdAndUpdate(leaveId, body, { new: true });
+    const updateBody = { ...body };
+    if (body.status === "Approved" || body.status === "Rejected") {
+      updateBody.approvedAt = new Date().toLocaleDateString();
+    }
+
+    await Leave.findByIdAndUpdate(leaveId, updateBody, { new: true });
     res.status(200).json({ message: "Leave request updated successfully" });
   } catch (error) {
     console.error("Error updating leave request:", error);

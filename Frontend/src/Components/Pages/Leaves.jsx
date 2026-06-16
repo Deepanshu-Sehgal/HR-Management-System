@@ -104,15 +104,20 @@ const Leaves = () => {
   const idd = useSelector((state) => state.leave.id);
   const working = useSelector((state) => state.leave.working);
   const dispatch = useDispatch();
+  const [reviewComment, setReviewComment] = useState("");
   const [updateUser, { err, load }] = useUpdateUserMutation();
   const handleUpdateCandidate = async () => {
     try {
       const body = {
         status: statusVal,
       };
+      if (reviewComment.trim()) {
+        body.reviewComment = reviewComment.trim();
+      }
       const response = await updateUser({ idd, body });
 
       fetchCandidates();
+      setReviewComment("");
     } catch (error) {
       console.log("NHK");
       console.error("Error:", error);
@@ -141,6 +146,7 @@ const Leaves = () => {
   };
   const handleStatusChange = (e) => setSelectedStatus(e.target.value);
   const handleClosePopup = () => setPopupOpen(false);
+  const handleReviewCommentChange = (e) => setReviewComment(e.target.value);
   const debounce = (func, delay) => {
     let timer;
     return (...args) => {
@@ -232,6 +238,10 @@ const Leaves = () => {
         className={styles.profileImg}
       />
     ),
+    approvedAt: candidate.approvedAt || "",
+    reviewComment: candidate.reviewComment || "",
+    approvedAt: candidate.approvedAt || "",
+    reviewComment: candidate.reviewComment || "",
     resume: (
       <img
         src={leavesdownload}
@@ -257,6 +267,13 @@ const Leaves = () => {
               </option>
             ))}
           </select>
+          <input
+            type="text"
+            value={reviewComment}
+            onChange={handleReviewCommentChange}
+            placeholder="Review comment"
+            className={styles.commentInput}
+          />
         </div>
 
         {/* Right Section: Search and Add Button */}

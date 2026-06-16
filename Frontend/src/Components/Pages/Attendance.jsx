@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { changeWorkingEmp } from "../../redux/Slices/EmployeeSlice";
 import {
   useGetUsersMutation,
+  useRecordAttendanceMutation,
   useUpdateUserMutation,
 } from "../../redux/Services/EmployeeApi";
 
@@ -19,14 +20,17 @@ const Attendance = () => {
   const [newtask, setNewtask] = useState("");
   const [getUsers, { isError, isLoading }] = useGetUsersMutation();
   const [updateUser, { issError, issLoading }] = useUpdateUserMutation();
+  const [recordAttendance] = useRecordAttendanceMutation();
   const columns = [
     { header: "", accessor: "SquareDiv" },
     { header: "Profile", accessor: "profile" },
     { header: "Employee Name", accessor: "employeeName" },
     { header: "Designation", accessor: "position" },
     { header: "Department", accessor: "department" },
+    { header: "Last Attendance", accessor: "lastAttendance" },
     { header: "Task", accessor: "task" },
     { header: "Status", accessor: "status" },
+    { header: "Action", accessor: "attendanceAction" },
     { header: "", accessor: "edit" },
   ];
   const fetchCandidates = async () => {
@@ -60,17 +64,36 @@ const Attendance = () => {
   //   },
   // ];
 
-  const updatedTableData = employeeData.map((employee, index) => ({
-    ...employee,
-    profile: (
-      <img
-        src={`http://localhost:5000/uploads/${employee.image}`}
-        alt="Profile"
-        style={{ height: "30px", width: "30px", borderRadius: "20px" }}
-        className={styles.profileImg}
-      />
-    ),
-    SquareDiv: (
+  const updatedTableData = employeeData.map((employee, index) => {
+    const lastRecord = employee.attendanceRecords?.length
+      ? employee.attendanceRecords[employee.attendanceRecords.length - 1]
+      : null;
+
+    return {
+      ...employee,
+      profile: (
+        <img
+          src={`http://localhost:5000/uploads/${employee.image}`}
+          alt="Profile"
+          style={{ height: "30px", width: "30px", borderRadius: "20px" }}
+          className={styles.profileImg}
+        />
+      ),
+      lastAttendance: lastRecord
+        ? `${lastRecord.checkIn}${lastRecord.checkOut ? ` / ${lastRecord.checkOut}` : ""}`
+        : "Not recorded",
+      attendanceAction: (
+        <button
+          className={styles.attendanceButton}
+          onClick={async () => {
+            await recordAttendance(employee._id);
+            fetchCandidates();
+          }}
+        >
+          Check In / Out
+        </button>
+      ),
+      SquareDiv: (
       <div
         className={styles.squareDiv}
         style={
@@ -136,6 +159,15 @@ const Attendance = () => {
     handleUpdateCandidate(bodyvalue);
   }, [newtask]);
 
+  const filteredTableData = updatedTableData.filter((row) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      row.employeeName?.toLowerCase().includes(lowerSearch) ||
+      row.position?.toLowerCase().includes(lowerSearch) ||
+      row.department?.toLowerCase().includes(lowerSearch)
+    );
+  });
+
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: 1 }}>
@@ -171,7 +203,7 @@ const Attendance = () => {
         {/* Reusable Table */}
         <ReusableTable
           navItems={[]}
-          tableData={updatedTableData}
+          tableData={filteredTableData}
           columns={columns}
           name="Attendance"
           newtask={setNewtask}

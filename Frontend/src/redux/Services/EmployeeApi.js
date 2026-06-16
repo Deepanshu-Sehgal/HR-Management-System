@@ -19,9 +19,18 @@ export const EmployeeApi = createApi({
       addUser: builder.mutation({
         query: (userData) => {
           return {
-            url: "/candidates",
+            url: "/employee",
             method: "POST",
             body: userData,
+          };
+        },
+        invalidatesTags: ["EmployeeApi"],
+      }),
+      recordAttendance: builder.mutation({
+        query: (id) => {
+          return {
+            url: `/employee/${id}/attendance`,
+            method: "POST",
           };
         },
         invalidatesTags: ["EmployeeApi"],
@@ -52,6 +61,7 @@ export const EmployeeApi = createApi({
 export const {
   useGetUsersMutation,
   useAddUserMutation,
+  useRecordAttendanceMutation,
   useDeleteUserMutation,
   useUpdateUserMutation,
 } = EmployeeApi;

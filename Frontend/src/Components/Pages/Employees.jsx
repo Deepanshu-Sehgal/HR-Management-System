@@ -18,6 +18,7 @@ const Employees = () => {
   const [employeeData, setEmployeeData] = useState([]);
   const positionOptions = ["Designer", "Developer", "Human Resources"];
   const [editemployeepop, setEditemployeepop] = useState(false);
+  const [isAddPopupOpen, setIsAddPopupOpen] = useState(false);
   const id = useSelector((state) => state.employeeId.id);
   const [getUsers, { isError, isLoading }] = useGetUsersMutation();
   const columns = [
@@ -78,9 +79,19 @@ const Employees = () => {
       placeholder: "Position",
     },
     {
+      name: "experience",
+      type: "text",
+      placeholder: "Experience",
+    },
+    {
       name: "date",
       type: "date",
-      placeholder: "Date",
+      placeholder: "Date of Joining",
+    },
+    {
+      name: "image",
+      type: "file",
+      placeholder: "Upload Profile Image",
     },
   ];
 
@@ -88,6 +99,8 @@ const Employees = () => {
     setEditemployeepop(false);
   }
   const [updateUser, { issError, issLoading }] = useUpdateUserMutation();
+  const [addUser, { isLoading: addLoading }] = useAddUserMutation();
+
   const handleUpdateEmployee = async (formData) => {
     console.log(formData, "formdata");
     for (let key in formData) {
@@ -102,11 +115,25 @@ const Employees = () => {
 
     try {
       const body = formData;
-      const response = await updateUser({ id, body });
-
+      await updateUser({ id, body });
       fetchCandidates();
     } catch (error) {
       console.error("Error:", error);
+    }
+  };
+
+  const handleSaveEmployee = async (formData) => {
+    try {
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach((key) => {
+        formDataToSend.append(key, formData[key]);
+      });
+
+      await addUser(formDataToSend);
+      fetchCandidates();
+      setIsAddPopupOpen(false);
+    } catch (error) {
+      console.error("Error onboarding employee:", error);
     }
   };
 
@@ -171,12 +198,15 @@ const Employees = () => {
               <img src={Search} alt="Search" className={styles.searchIcon} />
               <input
                 type="text"
-                placeholder="Search "
+                placeholder="Search"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className={styles.searchInput}
               />
             </div>
+            <button className={styles.addButton} onClick={() => setIsAddPopupOpen(true)}>
+              Add Employee
+            </button>
           </div>
         </div>
 
@@ -196,6 +226,15 @@ const Employees = () => {
           title="Edit Employee Details"
           fields={fields}
           onSave={handleUpdateEmployee}
+        />
+      )}
+      {isAddPopupOpen && (
+        <PopupForm
+          isOpen={isAddPopupOpen}
+          onClose={() => setIsAddPopupOpen(false)}
+          title="Onboard New Employee"
+          fields={fields}
+          onSave={handleSaveEmployee}
         />
       )}
     </div>
