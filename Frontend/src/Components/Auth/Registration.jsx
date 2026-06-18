@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import register from "./Registration.module.css";
 import { useNavigate ,Link} from "react-router-dom";
-import axios from "axios";
+import apiClient from "../../utils/apiClient";
 import { Logo, EyeOpen, EyeHidden, Onboard } from "../../assets";
 
 const Registration = () => {
@@ -30,12 +30,11 @@ const Registration = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/register", {
+      const response = await apiClient.post("/auth/register", {
         fullname,
         email,
         password,
       });
-      console.log(response);
       if (response.status === 201) {
         alert("Registration successful!");
         navigate("/login");
@@ -44,7 +43,7 @@ const Registration = () => {
       }
     } catch (error) {
       console.error(error);
-      alert("Registration failed");
+      alert("Registration failed: " + (error.response?.data?.message || "Unknown error"));
     }
   };
 

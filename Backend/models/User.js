@@ -15,6 +15,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  subscriptionStatus: {
+    type: String,
+    enum: ["free", "trial", "active", "cancelled", "expired"],
+    default: "free",
+  },
+  subscriptionPlan: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SubscriptionPlan",
+  },
+  subscriptionEnd: {
+    type: Date,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

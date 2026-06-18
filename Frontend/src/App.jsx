@@ -4,6 +4,7 @@ import Registration from "./Components/Auth/Registration";
 import Login from "./Components/Auth/Login";
 import Layout from "./Components/Layout/Layout";
 import DashBoard from "./Components/DashBoard/Dashboard";
+import PrivateRoute from "./Components/Auth/PrivateRoute";
 import Candidates from "./Components/Pages/Candidates";
 import Employees from "./Components/Pages/Employees";
 import Attendance from "./Components/Pages/Attendance";
@@ -16,19 +17,25 @@ import Announcements from "./Components/Pages/Announcements";
 import Documents from "./Components/Pages/Documents";
 import AttendanceAnalytics from "./Components/Pages/AttendanceAnalytics";
 import Reports from "./Components/Pages/Reports";
+import Subscription from "./Components/Pages/Subscription";
 
 function App() {
   return (
     <Router>
       <Routes>
-        
         <Route path="/" element={<Layout />}>
           <Route index element={<Registration />} />
           <Route path="login" element={<Login />} />
         </Route>
 
-        
-        <Route path="/dashboard" element={<DashBoard />}>
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashBoard />
+            </PrivateRoute>
+          }
+        >
           <Route path="candidates" element={<Candidates />} />
           <Route path="employees" element={<Employees />} />
           <Route path="attendance" element={<Attendance />} />
@@ -41,6 +48,7 @@ function App() {
           <Route path="documents" element={<Documents />} />
           <Route path="attendance-analytics" element={<AttendanceAnalytics />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="subscription" element={<Subscription />} />
         </Route>
       </Routes>
     </Router>

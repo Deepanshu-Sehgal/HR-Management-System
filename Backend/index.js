@@ -50,6 +50,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 
 app.use("/api/auth", authRoutes);
+app.use("/api/subscription", require("./routes/subscriptionRoutes"));
 app.use("/api", candidateRoutes);
 app.use("/api", employeeRoutes);
 app.use("/api", leaveRoutes);

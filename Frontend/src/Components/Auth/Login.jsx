@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import login from "./Registration.module.css";
 import { Logo, EyeOpen, EyeHidden, Onboard } from "../../assets";
-import axios from "axios";
+import apiClient from "../../utils/apiClient";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -21,11 +21,10 @@ const Login = () => {
     const password = event.target.password.value;
 
     try {
-      const response = await axios.post("http://localhost:4000/api/auth/login", {
+      const response = await apiClient.post("/auth/login", {
         email,
         password,
       });
-      console.log(response.data);
 
       localStorage.setItem("token", response.data.token);
 
@@ -33,7 +32,7 @@ const Login = () => {
       navigate("/dashboard/candidates");
     } catch (error) {
       console.error(error);
-      alert("Login failed: " + error.response.data.message);
+      alert("Login failed: " + (error.response?.data?.message || "Unknown error"));
     }
   };
 
