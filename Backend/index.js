@@ -16,9 +16,13 @@ const documentRoutes = require("./routes/documentRoutes");
 const attendanceAnalyticsRoutes = require("./routes/attendanceAnalyticsRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const cors = require("cors");
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const fs = require("fs");
 const path = require("path");
+// HTTP request logger (integrated with winston)
 const morgan = require('morgan');
+// Application-wide logger (winston) and error middleware
 const logger = require('./utils/logger');
 const errorHandler = require('./utils/errorHandler');
 const Leave = require("./models/Leave");
@@ -32,11 +36,39 @@ connectDB();
 const app = express();
 
 
-app.use(cors());
+// Security: set HTTP headers to sensible defaults
+app.use(helmet());
+
+// CORS: restrict origins via `CORS_ORIGINS` env var (comma-separated). If unset, allow all.
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+const corsOptions = {
+  origin: function(origin, callback) {
+    // allow requests with no origin (e.g., mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.length === 0 || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+};
+app.use(cors(corsOptions));
+
+// Serve uploaded files from /uploads
 app.use(express.static(path.join(__dirname, "uploads")));
+// Parse JSON request bodies
 app.use(express.json());
 
-// HTTP request logging
+// Rate limiter: basic protection against brute-force and spiky traffic
+const limiter = rateLimit({
+  windowMs: (process.env.RATE_LIMIT_WINDOW_MINUTES ? parseInt(process.env.RATE_LIMIT_WINDOW_MINUTES) : 15) * 60 * 1000,
+  max: process.env.RATE_LIMIT_MAX ? parseInt(process.env.RATE_LIMIT_MAX) : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
+// HTTP request logging: morgan writes logs into winston for unified logging
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', {
   stream: { write: (message) => logger.info(message.trim()) }
 }));
@@ -74,12 +106,13 @@ app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
 
-// Centralized error handler (should be after routes)
+// Centralized error handler (must come after all routes)
 app.use(errorHandler);
 
-// Handle uncaught exceptions and rejections
+// Optional: handle process-level errors to avoid silent crashes
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught Exception:', err.stack || err);
+  // In many setups it's safer to crash and let a process manager restart the app
   process.exit(1);
 });
 process.on('unhandledRejection', (reason) => {
@@ -87,6 +120,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 const PORT = process.env.PORT || 5000;
+// Start server and log via the configured logger
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
