@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchReports, createReport } from "../../redux/Slices/ReportSlice";
+import { fetchReports, createReport, fetchAnalyticsOverview } from "../../redux/Slices/ReportSlice";
 import styles from "./Reports.module.css";
 
 function Reports() {
   const dispatch = useDispatch();
-  const { reports, loading } = useSelector((state) => state.report);
+  const { reports, loading, overview, overviewLoading, overviewError } = useSelector((state) => state.report);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     reportName: "",
@@ -19,6 +19,7 @@ function Reports() {
 
   useEffect(() => {
     dispatch(fetchReports());
+    dispatch(fetchAnalyticsOverview());
   }, [dispatch]);
 
   const handleInputChange = (e) => {
@@ -51,6 +52,31 @@ function Reports() {
       <button onClick={() => setShowForm(!showForm)} className={styles.addBtn}>
         {showForm ? "Cancel" : "Generate Report"}
       </button>
+
+      <div className={styles.overviewGrid}>
+        <div className={styles.card}>
+          <h2>Total Employees</h2>
+          <p>{overviewLoading ? "Loading..." : overview?.totalEmployees ?? "—"}</p>
+        </div>
+        <div className={styles.card}>
+          <h2>Open Job Openings</h2>
+          <p>{overviewLoading ? "Loading..." : overview?.activeJobOpenings ?? "—"}</p>
+        </div>
+        <div className={styles.card}>
+          <h2>Pending Leave Requests</h2>
+          <p>{overviewLoading ? "Loading..." : overview?.pendingLeaveRequests ?? "—"}</p>
+        </div>
+        <div className={styles.card}>
+          <h2>Avg Attendance</h2>
+          <p>{overviewLoading ? "Loading..." : overview?.attendance?.averageAttendance?.toFixed(1) ?? "—"}%</p>
+        </div>
+        <div className={styles.card}>
+          <h2>Avg Performance</h2>
+          <p>{overviewLoading ? "Loading..." : overview?.performance?.averageRating?.toFixed(1) ?? "—"}</p>
+        </div>
+      </div>
+
+      {overviewError && <p className={styles.error}>{overviewError}</p>}
 
       {showForm && (
         <form onSubmit={handleSubmit} className={styles.form}>

@@ -6,6 +6,7 @@ router.post("/", jobOpeningController.createJobOpening);
 router.get("/", jobOpeningController.getAllJobOpenings);
 router.get("/active", jobOpeningController.getActiveJobOpenings);
 router.get("/:id", jobOpeningController.getJobOpeningById);
+router.get("/:id/match", jobOpeningController.matchEmployees);
 router.put("/:id", jobOpeningController.updateJobOpening);
 router.patch("/:id/close", jobOpeningController.closeJobOpening);
 router.delete("/:id", jobOpeningController.deleteJobOpening);

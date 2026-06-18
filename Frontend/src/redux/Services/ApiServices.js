@@ -108,6 +108,7 @@ export const AttendanceAnalyticsApi = {
 
 export const ReportApi = {
   getAllReports: () => axios.get(`${API_BASE_URL}/reports`),
+  getAnalyticsOverview: () => axios.get(`${API_BASE_URL}/reports/overview`),
   createReport: (data) => axios.post(`${API_BASE_URL}/reports`, data),
   updateReport: (id, data) => axios.put(`${API_BASE_URL}/reports/${id}`, data),
   deleteReport: (id) => axios.delete(`${API_BASE_URL}/reports/${id}`),

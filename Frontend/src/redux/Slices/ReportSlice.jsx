@@ -21,11 +21,22 @@ export const getReportsByType = createAsyncThunk(
   }
 );
 
+export const fetchAnalyticsOverview = createAsyncThunk(
+  "report/fetchAnalyticsOverview",
+  async () => {
+    const response = await axios.get(`${API_BASE_URL}/reports/overview`);
+    return response.data;
+  }
+);
+
 const initialState = {
   reports: [],
   filteredReports: [],
+  overview: null,
   loading: false,
+  overviewLoading: false,
   error: null,
+  overviewError: null,
 };
 
 const ReportSlice = createSlice({
@@ -50,6 +61,17 @@ const ReportSlice = createSlice({
       })
       .addCase(getReportsByType.fulfilled, (state, action) => {
         state.filteredReports = action.payload;
+      })
+      .addCase(fetchAnalyticsOverview.pending, (state) => {
+        state.overviewLoading = true;
+      })
+      .addCase(fetchAnalyticsOverview.fulfilled, (state, action) => {
+        state.overviewLoading = false;
+        state.overview = action.payload;
+      })
+      .addCase(fetchAnalyticsOverview.rejected, (state, action) => {
+        state.overviewLoading = false;
+        state.overviewError = action.error.message;
       });
   },
 });
