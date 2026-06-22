@@ -18,6 +18,7 @@ import Documents from "./Components/Pages/Documents";
 import AttendanceAnalytics from "./Components/Pages/AttendanceAnalytics";
 import Reports from "./Components/Pages/Reports";
 import Subscription from "./Components/Pages/Subscription";
+import AiAssistant from "./Components/Pages/AiAssistant";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="attendance-analytics" element={<AttendanceAnalytics />} />
           <Route path="reports" element={<Reports />} />
           <Route path="subscription" element={<Subscription />} />
+          <Route path="ai-assistant" element={<AiAssistant />} />
         </Route>
       </Routes>
     </Router>

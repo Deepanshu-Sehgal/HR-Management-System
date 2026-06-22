@@ -81,6 +81,12 @@ export const AnnouncementApi = {
     axios.patch(`${API_BASE_URL}/announcements/${id}/deactivate`),
 };
 
+export const AiApi = {
+  generateAnnouncement: (data) => axios.post(`${API_BASE_URL}/ai/announcement`, data),
+  generateJobDescription: (data) => axios.post(`${API_BASE_URL}/ai/job-description`, data),
+  summarizeText: (data) => axios.post(`${API_BASE_URL}/ai/document-summary`, data),
+};
+
 export const DocumentApi = {
   getAllDocuments: () => axios.get(`${API_BASE_URL}/documents`),
   getDocumentsByType: (type) => axios.get(`${API_BASE_URL}/documents/type/${type}`),

@@ -25,6 +25,7 @@ const Dashboard = () => {
     "/dashboard/employees": "Employees",
     "/dashboard/attendance": "Attendance",
     "/dashboard/leaves": "Leaves",
+    "/dashboard/ai-assistant": "AI Assistant",
   };
 
   const currentPage = pageTitles[location.pathname] || "Candidates";
@@ -127,6 +128,22 @@ const Dashboard = () => {
             )}
             <img src={Shine} alt="Leaves" className={dash.icon} />
             Leaves
+          </Link>
+        </div>
+
+        <div className={dash.menuSection}>
+          <div className={dash.menuHeading}>AI</div>
+          <Link
+            to="/dashboard/ai-assistant"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/ai-assistant" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/ai-assistant" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img src={Notifications} alt="AI" className={dash.icon} />
+            AI Assistant
           </Link>
         </div>
 

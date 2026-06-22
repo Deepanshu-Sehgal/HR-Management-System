@@ -15,6 +15,7 @@ const announcementRoutes = require("./routes/announcementRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const attendanceAnalyticsRoutes = require("./routes/attendanceAnalyticsRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -102,6 +103,7 @@ app.use("/api/job-openings", jobOpeningRoutes);
 app.use("/api/job-applications", jobApplicationRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/ai", aiRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
