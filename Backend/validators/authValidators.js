@@ -1,8 +1,8 @@
 const Joi = require('joi');
 
 exports.registerSchema = Joi.object({
-  name: Joi.string().trim().min(1).required().messages({
-    'string.empty': 'Name is required',
+  fullname: Joi.string().trim().min(1).required().messages({
+    'string.empty': 'Full name is required',
   }),
   email: Joi.string().trim().email().required().messages({
     'string.email': 'Valid email required',

@@ -15,10 +15,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ["admin", "hr", "employee"],
+    default: "employee",
+  },
   subscriptionStatus: {
     type: String,
     enum: ["free", "trial", "active", "cancelled", "expired"],
-    default: "free",
+    default: "trial",
   },
   subscriptionPlan: {
     type: mongoose.Schema.Types.ObjectId,

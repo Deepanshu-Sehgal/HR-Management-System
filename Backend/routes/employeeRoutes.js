@@ -5,6 +5,9 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const authMiddleware = require("../utils/authMiddleware");
+const authorize = require("../utils/authorize");
+const validate = require("../utils/validate");
 const {
   createEmployee,
   updateEmployees,
@@ -12,6 +15,7 @@ const {
   deleteEmployees,
   addAttendanceRecord,
 } = require("../controllers/employeeController");
+const { createEmployeeSchema, updateEmployeeSchema } = require("../validators/employeeValidators");
 
 
 const storage = multer.diskStorage({
@@ -26,13 +30,30 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-router.post("/employee", upload.single("image"), createEmployee);
-router.put("/employee/:id", updateEmployees);
-router.post("/employee/:id/attendance", addAttendanceRecord);
+router.post(
+  "/employee",
+  authMiddleware,
+  authorize("admin", "hr"),
+  upload.single("image"),
+  validate(createEmployeeSchema),
+  createEmployee
+);
+router.put(
+  "/employee/:id",
+  authMiddleware,
+  authorize("admin", "hr"),
+  validate(updateEmployeeSchema),
+  updateEmployees
+);
+router.post(
+  "/employee/:id/attendance",
+  authMiddleware,
+  authorize("admin", "hr", "employee"),
+  addAttendanceRecord
+);
 
-router.get("/employee", getEmployees);
-router.post("/employee/filter", getEmployees);
+router.get("/employee", authMiddleware, authorize("admin", "hr"), getEmployees);
+router.post("/employee/filter", authMiddleware, authorize("admin", "hr"), getEmployees);
 
-
-router.delete("/employee/:id", deleteEmployees);
+router.delete("/employee/:id", authMiddleware, authorize("admin", "hr"), deleteEmployees);
 module.exports = router;

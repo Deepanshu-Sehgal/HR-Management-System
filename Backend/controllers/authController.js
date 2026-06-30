@@ -5,15 +5,14 @@ const generateToken = require("../utils/generateToken");
 
 exports.registerUser = async (req, res) => {
   const { fullname, email, password } = req.body;
+  const trialDays = parseInt(process.env.TRIAL_DAYS, 10) || 7;
 
   try {
-    
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -21,14 +20,18 @@ exports.registerUser = async (req, res) => {
       fullname,
       email,
       password: hashedPassword,
+      subscriptionStatus: "trial",
+      subscriptionEnd: new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000),
     });
 
-    
     if (user) {
       res.status(201).json({
         _id: user._id,
         fullname: user.fullname,
         email: user.email,
+        role: user.role,
+        subscriptionStatus: user.subscriptionStatus,
+        subscriptionEnd: user.subscriptionEnd,
         token: generateToken(user._id),
       });
     } else {
@@ -58,6 +61,9 @@ exports.loginUser = async (req, res) => {
       _id: user._id,
       fullname: user.fullname,
       email: user.email,
+      role: user.role,
+      subscriptionStatus: user.subscriptionStatus,
+      subscriptionEnd: user.subscriptionEnd,
       token: generateToken(user._id),
     });
   } catch (error) {

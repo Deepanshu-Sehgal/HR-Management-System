@@ -19,6 +19,9 @@ const aiRoutes = require("./routes/aiRoutes");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
 const fs = require("fs");
 const path = require("path");
 // HTTP request logger (integrated with winston)
@@ -26,6 +29,7 @@ const morgan = require('morgan');
 // Application-wide logger (winston) and error middleware
 const logger = require('./utils/logger');
 const errorHandler = require('./utils/errorHandler');
+const notFound = require('./utils/notFound');
 const Leave = require("./models/Leave");
 
 
@@ -54,11 +58,15 @@ const corsOptions = {
   }
 };
 app.use(cors(corsOptions));
+app.use(mongoSanitize());
+app.use(hpp());
+app.use(compression());
 
 // Serve uploaded files from /uploads
 app.use(express.static(path.join(__dirname, "uploads")));
-// Parse JSON request bodies
+// Parse JSON request bodies and URL-encoded forms
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Rate limiter: basic protection against brute-force and spiky traffic
 const limiter = rateLimit({
@@ -107,6 +115,15 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+  });
+});
+
+app.use(notFound);
 
 // Centralized error handler (must come after all routes)
 app.use(errorHandler);

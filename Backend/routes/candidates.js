@@ -3,13 +3,15 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const authMiddleware = require("../utils/authMiddleware");
+const authorize = require("../utils/authorize");
+const { createFileFilter } = require("../utils/fileUpload");
 const {
   createCandidate,
   getCandidates,
   deleteCandidate,
   updateCandidate,
 } = require("../controllers/candidateController");
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -20,7 +22,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage, fileFilter: createFileFilter(["resume", "image"]) });
 
 
 router.post(

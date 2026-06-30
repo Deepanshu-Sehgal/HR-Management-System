@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../utils/authMiddleware");
+const authorize = require("../utils/authorize");
 const performanceController = require("../controllers/performanceController");
 
-router.post("/", performanceController.createPerformanceReview);
-router.get("/", performanceController.getAllPerformanceReviews);
-router.get("/employee/:employeeId", performanceController.getReviewsByEmployeeId);
-router.get("/analytics", performanceController.getReviewAnalytics);
-router.put("/:id", performanceController.updatePerformanceReview);
-router.delete("/:id", performanceController.deletePerformanceReview);
+router.post("/", authMiddleware, authorize("admin", "hr"), performanceController.createPerformanceReview);
+router.get("/", authMiddleware, authorize("admin", "hr", "employee"), performanceController.getAllPerformanceReviews);
+router.get("/employee/:employeeId", authMiddleware, performanceController.getReviewsByEmployeeId);
+router.get("/analytics", authMiddleware, authorize("admin", "hr"), performanceController.getReviewAnalytics);
+router.put("/:id", authMiddleware, authorize("admin", "hr"), performanceController.updatePerformanceReview);
+router.delete("/:id", authMiddleware, authorize("admin", "hr"), performanceController.deletePerformanceReview);
 
 module.exports = router;
