@@ -4,6 +4,9 @@ const Employees = require("../models/Employee");
 const Candidate = require("../models/Candidate");
 const Leave = require("../models/Leave");
 
+const generateUniqueId = (prefix) => {
+  return `${prefix}-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+};
 
 exports.getEmployees = async (req, res) => {
   console.log(req.body);
@@ -45,7 +48,10 @@ exports.createEmployee = async (req, res) => {
     const imagePath = path.join(__dirname, "..", "uploads", imageFileName);
     fs.renameSync(imageFile.path, imagePath);
 
+    const employeeId = req.body.employeeId || generateUniqueId("EMP");
+
     const newEmployee = new Employees({
+      employeeId,
       employeeName,
       email,
       phoneNumber,

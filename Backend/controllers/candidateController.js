@@ -3,6 +3,9 @@ const Employee = require("../models/Employee");
 const path = require("path");
 const fs = require("fs");
 
+const generateUniqueId = (prefix) => {
+  return `${prefix}-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+};
 
 exports.createCandidate = async (req, res) => {
   console.log(req.body);
@@ -11,7 +14,9 @@ exports.createCandidate = async (req, res) => {
     const imageFile = req.files["image"] ? req.files["image"][0] : null;
     const { candidateName, email, phoneNumber, department, experience } = req.body;
 
-    
+    const candidateId = generateUniqueId("CAN");
+    const employeeId = generateUniqueId("EMP");
+
     if (!resumeFile) {
       return res.status(400).json({ message: "Resume is required" });
     }
@@ -24,7 +29,6 @@ exports.createCandidate = async (req, res) => {
     const imageFileName = `${Date.now()}-${imageFile.originalname}`;
     const imagePath = path.join(__dirname, "..", "uploads", imageFileName);
 
-    
     fs.renameSync(resumeFile.path, resumePath);
     fs.renameSync(imageFile.path, imagePath);
 
@@ -32,6 +36,7 @@ exports.createCandidate = async (req, res) => {
     console.log(datee, "date");
 
     const newCandidate = new Candidate({
+      candidateId,
       candidateName,
       email,
       phoneNumber,
@@ -43,8 +48,8 @@ exports.createCandidate = async (req, res) => {
       image: imageFileName,
     });
 
-    
     const newEmployee = new Employee({
+      employeeId,
       employeeName: candidateName,
       email,
       phoneNumber,

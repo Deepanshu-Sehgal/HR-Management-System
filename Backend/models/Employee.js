@@ -4,6 +4,13 @@ const mongoose = require("mongoose");
 
 
 const EmployeeSchema = new mongoose.Schema({
+  employeeId: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    uppercase: true,
+  },
   employeeName: {
     type: String,
     required: true,

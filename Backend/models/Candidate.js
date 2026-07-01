@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 
 const candidateSchema = new mongoose.Schema({
+  candidateId: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    uppercase: true,
+  },
   candidateName: {
     type: String,
     required: true,
