@@ -109,3 +109,34 @@ exports.filterbydate = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+exports.getLeaveSummary = async (req, res) => {
+  try {
+    const summary = await Leave.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const counts = {
+      total: 0,
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+    };
+
+    summary.forEach((item) => {
+      const statusKey = item._id ? item._id.toLowerCase() : "unknown";
+      counts[statusKey] = item.count;
+      counts.total += item.count;
+    });
+
+    res.status(200).json(counts);
+  } catch (error) {
+    console.error("Error fetching leave summary:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

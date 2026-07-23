@@ -16,6 +16,7 @@ import {
   useGetUsersbydateMutation,
   useGetUsersMutation,
   useUpdateUserMutation,
+  useGetLeaveSummaryQuery,
 } from "../../redux/Services/LeaveApi";
 
 const Leaves = () => {
@@ -83,6 +84,8 @@ const Leaves = () => {
     { header: "Docs", accessor: "resume" },
   ];
   const [getUsers, { isError, isLoading }] = useGetUsersMutation();
+  const { data: leaveSummary, isLoading: summaryLoading } = useGetLeaveSummaryQuery();
+
   const fetchCandidates = async () => {
     try {
       const body = {
@@ -182,6 +185,7 @@ const Leaves = () => {
     debounce((term) => setSearchTerm(term), 300),
     []
   );
+
   const fields = [
     {
       name: "name",
@@ -238,10 +242,6 @@ const Leaves = () => {
         className={styles.profileImg}
       />
     ),
-    approvedAt: candidate.approvedAt || "",
-    reviewComment: candidate.reviewComment || "",
-    approvedAt: candidate.approvedAt || "",
-    reviewComment: candidate.reviewComment || "",
     resume: (
       <img
         src={leavesdownload}
@@ -251,6 +251,17 @@ const Leaves = () => {
       />
     ),
   }));
+
+  const filteredTableData = updatedTableData.filter((row) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      row.name?.toLowerCase().includes(lowerSearch) ||
+      row.department?.toLowerCase().includes(lowerSearch) ||
+      row.reason?.toLowerCase().includes(lowerSearch) ||
+      row.status?.toLowerCase().includes(lowerSearch)
+    );
+  });
+
   console.log(datedata, "leaves updated data");
   return (
     <div className={styles.container}>
@@ -276,7 +287,6 @@ const Leaves = () => {
           />
         </div>
 
-        {/* Right Section: Search and Add Button */}
         <div className={styles.rightSectionNav}>
           <div className={styles.searchWrapper}>
             <img src={Search} alt="Search" className={styles.searchIcon} />
@@ -293,58 +303,72 @@ const Leaves = () => {
         </div>
       </div>
 
-      {/* Content */}
+      <div className={styles.summaryGrid}>
+        <div className={styles.summaryCard}>
+          <p className={styles.summaryTitle}>Total Leaves</p>
+          <p className={styles.summaryValue}>{leaveSummary?.total ?? 0}</p>
+        </div>
+        <div className={styles.summaryCard}>
+          <p className={styles.summaryTitle}>Pending</p>
+          <p className={styles.summaryValue}>{leaveSummary?.pending ?? 0}</p>
+        </div>
+        <div className={styles.summaryCard}>
+          <p className={styles.summaryTitle}>Approved</p>
+          <p className={styles.summaryValue}>{leaveSummary?.approved ?? 0}</p>
+        </div>
+        <div className={styles.summaryCard}>
+          <p className={styles.summaryTitle}>Rejected</p>
+          <p className={styles.summaryValue}>{leaveSummary?.rejected ?? 0}</p>
+        </div>
+      </div>
+
       <div className={styles.content}>
-        {/* Left Section: Table */}
         <div className={styles.leftSection}>
           <div className={styles.tableContainer}>
             <ReusableTable
               columns={columns}
-              tableData={updatedTableData}
+              tableData={filteredTableData}
               name="Leaves"
             />
           </div>
         </div>
 
-        {/* Right Section: Calendar */}
         <div className={styles.rightSection}>
           <div className={styles.calendar}>
             <h2 className={styles.calendarTitle}>Leave Calendar</h2>
             <div className={styles.calendarControls}>
-              {/* Calendar Icon and Date Input */}
               <button
                 className={styles.todayButton}
                 onClick={() => {
-                  setSelectedDate(getCurrentDate);
-                  console.log(getCurrentDate(), "today date");
+                  setSelectedDate(getCurrentDate());
                 }}
               >
                 Today
               </button>
               <div className={styles.calendarInputWrapper}>
                 <img
-                  src={CalenderEvent} // Your custom calendar icon SVG
+                  src={CalenderEvent}
                   alt="calendar icon"
-                  className={styles.customCalendarIcon} // Custom icon style
-                  onClick={openDatePicker} // Open date picker on icon click
+                  className={styles.customCalendarIcon}
+                  onClick={openDatePicker}
                 />
                 <input
                   type="date"
-                  ref={dateInputRef} // Bind input to ref
-                  value={selectedDate} // Bind selected date to input
-                  onChange={handleDateChange} // Handle date change
-                  min={getCurrentDate()} // Disable past dates
-                  className={styles.calendarDateInput} // Style input to hide default icon
+                  ref={dateInputRef}
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  min={getCurrentDate()}
+                  className={styles.calendarDateInput}
                 />
               </div>
             </div>
             <div className={styles.entries}>
               {datedata.length > 0 ? (
                 datedata.map((data, i) => (
-                  <div className={styles.calendarEntry}>
+                  <div key={i} className={styles.calendarEntry}>
                     <img
                       src={`http://localhost:5000/uploads/${data.image}`}
-                      alt="Wade Warren"
+                      alt={data.name}
                       className={styles.profileImage}
                     />
                     <div>

@@ -8,10 +8,14 @@ An end-to-end Human Resource Management System developed using the MERN stack (M
 
 - 🔐 Role-Based Authentication (Admin, HR, Employee)
 - 👤 Employee Management (Add, Update, Delete, View)
+- 🔎 Advanced Employee Search and Filter by name, email, department, and position
+- 📤 Export Employee Data to CSV
 - 🕒 Attendance Tracking with In/Out Timings
 - 📅 Leave Management System
 - 💰 Payroll Generation and Salary Slips
 - 📊 HR Dashboard with Analytics and Reports
+- 🤝 Skill-Based Job Matching for open roles
+- 📈 HR Analytics Overview with attendance, performance, and skill gap insights
 - 📧 Email Notifications for Leave and Payroll Actions
 - 📁 Document Upload (Resume, Offer Letters, etc.)
 

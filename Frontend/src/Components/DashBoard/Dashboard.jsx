@@ -14,6 +14,7 @@ import {
   Notifications,
   Profile,
   Leftmenu,
+  Work,
 } from "../../assets";
 
 const Dashboard = () => {
@@ -26,6 +27,7 @@ const Dashboard = () => {
     "/dashboard/attendance": "Attendance",
     "/dashboard/leaves": "Leaves",
     "/dashboard/ai-assistant": "AI Assistant",
+    "/dashboard/hr-management": "HR Management",
   };
 
   const currentPage = pageTitles[location.pathname] || "Candidates";
@@ -128,6 +130,22 @@ const Dashboard = () => {
             )}
             <img src={Shine} alt="Leaves" className={dash.icon} />
             Leaves
+          </Link>
+        </div>
+
+        <div className={dash.menuSection}>
+          <div className={dash.menuHeading}>HR</div>
+          <Link
+            to="/dashboard/hr-management"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/hr-management" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/hr-management" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img src={Work} alt="HR Management" className={dash.icon} />
+            HR Management
           </Link>
         </div>
 

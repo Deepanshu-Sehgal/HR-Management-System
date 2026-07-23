@@ -46,11 +46,45 @@
   scrollbar-color: var(--violet-mix-1) white;
 }
 
-.statusDropdown {
+..statusDropdown {
   padding: 10px;
   border-radius: 20px;
   border: 1px solid #ccc;
 }
+
+.commentInput {
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+  width: 260px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.summaryCard {
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 20px 45px rgba(120, 62, 237, 0.08);
+}
+
+.summaryTitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.summaryValue {
+  font-size: 28px;
+  font-weight: 700;
+}
+
 .designation {
   color: grey;
   font-size: 12px;
