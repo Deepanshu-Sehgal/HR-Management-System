@@ -54,6 +54,7 @@ export const JobOpeningApi = {
   deleteJobOpening: (id) => axios.delete(`${API_BASE_URL}/job-openings/${id}`),
   getJobOpeningById: (id) => axios.get(`${API_BASE_URL}/job-openings/${id}`),
   closeJobOpening: (id) => axios.patch(`${API_BASE_URL}/job-openings/${id}/close`),
+  matchJobOpening: (id) => axios.get(`${API_BASE_URL}/job-openings/${id}/match`),
 };
 
 export const JobApplicationApi = {

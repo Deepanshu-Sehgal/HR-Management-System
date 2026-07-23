@@ -7,7 +7,10 @@ exports.jobOpeningSchema = Joi.object({
   responsibilities: Joi.array().items(Joi.string().trim().required()).min(1).required(),
   qualifications: Joi.array().items(Joi.string().trim().required()).min(1).required(),
   requiredSkills: Joi.array().items(Joi.string().trim().required()).min(1).required(),
-  salaryRange: Joi.string().trim().required(),
+  salaryRange: Joi.object({
+    min: Joi.number().min(0).required(),
+    max: Joi.number().min(Joi.ref("min")).required(),
+  }).required(),
   jobType: Joi.string().trim().required(),
   location: Joi.string().trim().required(),
   experience: Joi.string().trim().required(),
