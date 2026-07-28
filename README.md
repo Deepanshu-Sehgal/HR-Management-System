@@ -15,6 +15,8 @@ An end-to-end Human Resource Management System developed using the MERN stack (M
 - 💰 Payroll Generation and Salary Slips
 - 📊 HR Dashboard with Analytics and Reports
 - 🤝 Skill-Based Job Matching for open roles
+- 🧠 AI Interview Question Generator for HR hiring workflows
+- 📋 AI Onboarding Checklist Creator for new hires
 - 📈 HR Analytics Overview with attendance, performance, and skill gap insights
 - 📧 Email Notifications for Leave and Payroll Actions
 - 📁 Document Upload (Resume, Offer Letters, etc.)

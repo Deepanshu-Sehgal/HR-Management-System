@@ -85,6 +85,8 @@ export const AnnouncementApi = {
 export const AiApi = {
   generateAnnouncement: (data) => axios.post(`${API_BASE_URL}/ai/announcement`, data),
   generateJobDescription: (data) => axios.post(`${API_BASE_URL}/ai/job-description`, data),
+  generateInterviewQuestions: (data) => axios.post(`${API_BASE_URL}/ai/interview-questions`, data),
+  generateOnboardingChecklist: (data) => axios.post(`${API_BASE_URL}/ai/onboarding-checklist`, data),
   summarizeText: (data) => axios.post(`${API_BASE_URL}/ai/document-summary`, data),
 };
 
