@@ -20,6 +20,16 @@ An end-to-end Human Resource Management System developed using the MERN stack (M
 - 📈 HR Analytics Overview with attendance, performance, and skill gap insights
 - 📧 Email Notifications for Leave and Payroll Actions
 - 📁 Document Upload (Resume, Offer Letters, etc.)
+- 🧾 Expense Reimbursement Requests and Approval Tracking
+- 🎯 Performance Reviews with Goal Setting and Feedback
+- 📚 Training & Development Tracking for employee skills
+- 🗓 Shift Scheduling, Roster Management, and Work Pattern Support
+- 📢 Company Announcements and HR News Feed
+- 📂 Policy & Document Acknowledgement Workflow
+- 🔍 Candidate Pipeline Tracking with Application Status
+- 🧠 AI Resume Screening and Interview Question Suggestions
+- 🌐 Employee Self-Service Portal for leave, documents, and profile updates
+- 🔒 Audit Trail for HR actions and change history
 
 ---
 
