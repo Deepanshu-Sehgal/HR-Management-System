@@ -20,6 +20,9 @@ import Reports from "./Components/Pages/Reports";
 import Subscription from "./Components/Pages/Subscription";
 import AiAssistant from "./Components/Pages/AiAssistant";
 import HRManagement from "./Components/Pages/HRManagement";
+import Landing from "./Components/Pages/Landing";
+import LegalPage from "./Components/Pages/LegalPage";
+import ContentPages from "./Components/Pages/ContentPages";
 
 function App() {
   return (
@@ -53,7 +56,10 @@ function App() {
           <Route path="subscription" element={<Subscription />} />
           <Route path="ai-assistant" element={<AiAssistant />} />
           <Route path="hr-management" element={<HRManagement />} />
+          <Route path="content-pages" element={<ContentPages />} />
         </Route>
+        <Route path="landing" element={<Landing />} />
+        <Route path="legal/:slug" element={<LegalPage />} />
       </Routes>
     </Router>
   );

@@ -12,6 +12,7 @@ import announcement from "./Slices/AnnouncementSlice";
 import document from "./Slices/DocumentSlice";
 import attendanceAnalytics from "./Slices/AttendanceAnalyticsSlice";
 import report from "./Slices/ReportSlice";
+import page from "./Slices/PageSlice";
 import { CandidateApi } from "./Services/CandidateApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { EmployeeApi } from "./Services/EmployeeApi";
@@ -32,6 +33,7 @@ export const store = configureStore({
     document: document,
     attendanceAnalytics: attendanceAnalytics,
     report: report,
+    page: page,
     [CandidateApi.reducerPath]: CandidateApi.reducer,
     [EmployeeApi.reducerPath]: EmployeeApi.reducer,
     [LeaveApi.reducerPath]: LeaveApi.reducer,
