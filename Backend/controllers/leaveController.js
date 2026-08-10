@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const Leave = require("../models/Leave");
+const { sendEmail } = require("../utils/email");
 
 
 exports.getLeaveData = async (req, res) => {
@@ -53,6 +54,7 @@ exports.createLeave = async (req, res) => {
     fs.renameSync(imageFile.path, imagePath);
 
     const datee = new Date().toLocaleDateString();
+    const leaveEmail = req.user?.email || req.body.email || "";
     const newLeave = new Leave({
       name,
       department,
@@ -60,11 +62,26 @@ exports.createLeave = async (req, res) => {
       date: datee,
       reason,
       status: "Pending",
+      email: leaveEmail,
       resume: resumeFileName,
       image: imageFileName,
     });
 
     await newLeave.save();
+
+    if (leaveEmail) {
+      try {
+        await sendEmail({
+          to: leaveEmail,
+          subject: "Leave Request Submitted",
+          text: `Your leave request for ${reverseDate(finalleavedate)} has been submitted and is currently pending approval.`,
+          html: `<p>Hello ${name},</p><p>Your leave request for <strong>${reverseDate(finalleavedate)}</strong> has been submitted successfully and is pending approval.</p><p>Reason: ${reason}</p>`,
+        });
+      } catch (emailError) {
+        console.error("Leave email notification failed:", emailError);
+      }
+    }
+
     res.status(201).json({ message: "Leave saved successfully", resumePath });
   } catch (error) {
     console.error("Error saving leave:", error);
@@ -89,7 +106,21 @@ exports.updateLeave = async (req, res) => {
       updateBody.approvedAt = new Date().toLocaleDateString();
     }
 
-    await Leave.findByIdAndUpdate(leaveId, updateBody, { new: true });
+    const updatedLeave = await Leave.findByIdAndUpdate(leaveId, updateBody, { new: true });
+
+    if (updatedLeave?.email && body.status) {
+      try {
+        await sendEmail({
+          to: updatedLeave.email,
+          subject: `Leave Request ${body.status}`,
+          text: `Your leave request has been ${body.status.toLowerCase()}.`,
+          html: `<p>Hello ${updatedLeave.name || "Team Member"},</p><p>Your leave request has been <strong>${body.status}</strong>.</p>${body.reviewComment ? `<p>Comment: ${body.reviewComment}</p>` : ""}`,
+        });
+      } catch (emailError) {
+        console.error("Leave status email notification failed:", emailError);
+      }
+    }
+
     res.status(200).json({ message: "Leave request updated successfully" });
   } catch (error) {
     console.error("Error updating leave request:", error);

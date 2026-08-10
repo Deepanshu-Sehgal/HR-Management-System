@@ -78,6 +78,7 @@ const Leaves = () => {
   const columns = [
     { header: " ", accessor: "profile" },
     { header: "Name", accessor: "name" },
+    { header: "Email", accessor: "email" },
     { header: "Date", accessor: "leavedate" },
     { header: "Reason", accessor: "reason" },
     { header: "Status", accessor: "status" },
@@ -191,6 +192,12 @@ const Leaves = () => {
       name: "name",
       type: "text",
       placeholder: "Candidate Name",
+      required: true,
+    },
+    {
+      name: "email",
+      type: "email",
+      placeholder: "Email",
       required: true,
     },
     {

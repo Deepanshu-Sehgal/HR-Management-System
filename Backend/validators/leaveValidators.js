@@ -2,6 +2,7 @@ const Joi = require('joi');
 
 exports.leaveSchema = Joi.object({
   name: Joi.string().trim().required(),
+  email: Joi.string().trim().email().required(),
   department: Joi.string().trim().required(),
   leavedate1: Joi.date().iso().required(),
   leavedate2: Joi.date().iso().required(),
