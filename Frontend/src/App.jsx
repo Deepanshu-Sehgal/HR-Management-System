@@ -13,6 +13,7 @@ import Departments from "./Components/Pages/Departments";
 import PerformanceReviews from "./Components/Pages/PerformanceReviews";
 import Payroll from "./Components/Pages/Payroll";
 import Recruitment from "./Components/Pages/Recruitment";
+import Pipeline from "./Components/Pages/Pipeline";
 import Announcements from "./Components/Pages/Announcements";
 import Documents from "./Components/Pages/Documents";
 import AttendanceAnalytics from "./Components/Pages/AttendanceAnalytics";
@@ -49,6 +50,7 @@ function App() {
           <Route path="performance" element={<PerformanceReviews />} />
           <Route path="payroll" element={<Payroll />} />
           <Route path="recruitment" element={<Recruitment />} />
+          <Route path="pipeline" element={<Pipeline />} />
           <Route path="announcements" element={<Announcements />} />
           <Route path="documents" element={<Documents />} />
           <Route path="attendance-analytics" element={<AttendanceAnalytics />} />

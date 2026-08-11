@@ -46,7 +46,7 @@
   scrollbar-color: var(--violet-mix-1) white;
 }
 
-..statusDropdown {
+.statusDropdown {
   padding: 10px;
   border-radius: 20px;
   border: 1px solid #ccc;

@@ -23,6 +23,7 @@ const Dashboard = () => {
 
   const pageTitles = {
     "/dashboard/candidates": "Candidates",
+    "/dashboard/pipeline": "Recruitment Pipeline",
     "/dashboard/employees": "Employees",
     "/dashboard/attendance": "Attendance",
     "/dashboard/leaves": "Leaves",
@@ -82,6 +83,24 @@ const Dashboard = () => {
               }`}
             />
             Candidates
+          </Link>
+          <Link
+            to="/dashboard/pipeline"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/pipeline" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/pipeline" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={Signal}
+              alt="Pipeline"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/pipeline" ? dash.activeIcon : ""
+              }`}
+            />
+            Pipeline
           </Link>
         </div>
 

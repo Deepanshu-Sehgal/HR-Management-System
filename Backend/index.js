@@ -18,6 +18,8 @@ const reportRoutes = require("./routes/reportRoutes");
 const reimbursementRoutes = require("./routes/reimbursementRoutes");
 const policyRoutes = require("./routes/policyRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const pipelineRoutes = require("./routes/pipelineRoutes");
+const pipelineController = require("./controllers/pipelineController");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -116,6 +118,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/reimbursements", reimbursementRoutes);
 app.use("/api/policies", policyRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/pipelines", pipelineRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
@@ -147,3 +150,18 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
+
+// Recruitment pipeline automation: periodically sweep for SLA-breached
+// applications and auto-advance / flag them. Interval configurable via
+// PIPELINE_SWEEP_MINUTES (default 60). Set to 0 to disable.
+const sweepMinutes = process.env.PIPELINE_SWEEP_MINUTES
+  ? parseInt(process.env.PIPELINE_SWEEP_MINUTES, 10)
+  : 60;
+if (sweepMinutes > 0) {
+  setInterval(() => {
+    pipelineController.runSlaSweep().catch((err) =>
+      logger.error(`Scheduled SLA sweep failed: ${err.message}`)
+    );
+  }, sweepMinutes * 60 * 1000);
+  logger.info(`Pipeline SLA sweep scheduled every ${sweepMinutes} minute(s)`);
+}
