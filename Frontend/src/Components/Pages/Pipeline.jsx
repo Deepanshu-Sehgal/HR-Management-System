@@ -30,6 +30,10 @@ function Pipeline() {
   const [selected, setSelected] = useState(null); // application in detail drawer
   const [note, setNote] = useState("");
   const [sweeping, setSweeping] = useState(false);
+  const [search, setSearch] = useState("");
+  const [overdueOnly, setOverdueOnly] = useState(false);
+  const [dragId, setDragId] = useState(null);
+  const [dragOverCol, setDragOverCol] = useState(null);
 
   const pipelineId = activePipeline?._id;
 
@@ -96,6 +100,49 @@ function Pipeline() {
     setSweeping(false);
   };
 
+  // Apply the search + overdue-only filters to a column's cards.
+  const filterApps = (apps) =>
+    apps.filter((a) => {
+      if (overdueOnly && !isOverdue(a.dueAt)) return false;
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        return (
+          (a.applicantName || "").toLowerCase().includes(q) ||
+          (a.jobTitle || "").toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+
+  // ---- Native drag & drop between columns ----
+  const findApp = (id) => {
+    for (const col of columns) {
+      const found = col.applications.find((a) => a._id === id);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const onDragStart = (e, app) => {
+    setDragId(app._id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDragOverCol = (e, key) => {
+    e.preventDefault();
+    if (dragOverCol !== key) setDragOverCol(key);
+  };
+
+  const onDropCol = async (e, col) => {
+    e.preventDefault();
+    const app = findApp(dragId);
+    setDragOverCol(null);
+    setDragId(null);
+    if (app && app.stageKey !== col.key) {
+      await handleMove(app, col.key);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerRow}>
@@ -155,29 +202,76 @@ function Pipeline() {
         </div>
       )}
 
+      {/* Board toolbar: search + filters */}
+      <div className={styles.toolbar}>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="🔍 Search candidate or job title..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <label className={styles.toggle}>
+          <input
+            type="checkbox"
+            checked={overdueOnly}
+            onChange={(e) => setOverdueOnly(e.target.checked)}
+          />
+          Overdue only
+        </label>
+        {(search || overdueOnly) && (
+          <button
+            className={styles.clearBtn}
+            onClick={() => {
+              setSearch("");
+              setOverdueOnly(false);
+            }}
+          >
+            Clear
+          </button>
+        )}
+        <span className={styles.hint}>Tip: drag a card to another column to move it.</span>
+      </div>
+
       {/* Kanban board */}
       {loading ? (
         <p>Loading board...</p>
       ) : (
         <div className={styles.board}>
-          {columns.map((col) => (
-            <div key={col.key} className={styles.column}>
+          {columns.map((col) => {
+            const visible = filterApps(col.applications);
+            return (
+            <div
+              key={col.key}
+              className={`${styles.column} ${dragOverCol === col.key ? styles.columnDragOver : ""}`}
+              onDragOver={(e) => onDragOverCol(e, col.key)}
+              onDragLeave={() => setDragOverCol((k) => (k === col.key ? null : k))}
+              onDrop={(e) => onDropCol(e, col)}
+            >
               <div className={styles.columnHeader} style={{ borderTopColor: col.color }}>
                 <span className={styles.columnName}>{col.name}</span>
-                <span className={styles.columnCount}>{col.count}</span>
+                <span className={styles.columnCount}>{visible.length}</span>
                 {col.overdueCount > 0 && (
                   <span className={styles.overduePill}>{col.overdueCount} late</span>
                 )}
               </div>
 
               <div className={styles.columnBody}>
-                {col.applications.length === 0 && (
+                {visible.length === 0 && (
                   <div className={styles.emptyCol}>No candidates</div>
                 )}
-                {col.applications.map((app) => (
+                {visible.map((app) => (
                   <div
                     key={app._id}
-                    className={`${styles.card} ${isOverdue(app.dueAt) ? styles.cardOverdue : ""}`}
+                    draggable
+                    onDragStart={(e) => onDragStart(e, app)}
+                    onDragEnd={() => {
+                      setDragId(null);
+                      setDragOverCol(null);
+                    }}
+                    className={`${styles.card} ${isOverdue(app.dueAt) ? styles.cardOverdue : ""} ${
+                      dragId === app._id ? styles.cardDragging : ""
+                    }`}
                   >
                     <div className={styles.cardTop}>
                       <strong className={styles.cardName}>{app.applicantName}</strong>
@@ -230,7 +324,8 @@ function Pipeline() {
                 ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
