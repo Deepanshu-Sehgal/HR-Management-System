@@ -16,6 +16,7 @@ import {
   fetchInterviewsByApplication,
   scheduleInterview,
   cancelInterview,
+  updateInterview,
 } from "../../redux/Slices/InterviewSlice";
 import styles from "./Pipeline.module.css";
 
@@ -52,6 +53,8 @@ function Pipeline() {
   const [dragOverCol, setDragOverCol] = useState(null);
   const [showSchedule, setShowSchedule] = useState(false);
   const [ivForm, setIvForm] = useState(EMPTY_INTERVIEW);
+  const [feedbackFor, setFeedbackFor] = useState(null); // interview id being reviewed
+  const [fbForm, setFbForm] = useState({ status: "Completed", rating: 0, feedback: "" });
 
   const pipelineId = activePipeline?._id;
 
@@ -147,6 +150,31 @@ function Pipeline() {
 
   const handleCancelInterview = async (id) => {
     await dispatch(cancelInterview(id));
+    if (selected?._id) dispatch(fetchInterviewsByApplication(selected._id));
+  };
+
+  const openFeedback = (iv) => {
+    setFeedbackFor(iv._id);
+    setFbForm({
+      status: iv.status === "Scheduled" ? "Completed" : iv.status,
+      rating: iv.rating || 0,
+      feedback: iv.feedback || "",
+    });
+  };
+
+  const handleSaveFeedback = async (id) => {
+    await dispatch(
+      updateInterview({
+        id,
+        data: {
+          status: fbForm.status,
+          rating: Number(fbForm.rating) || 0,
+          feedback: fbForm.feedback,
+          updatedBy: "HR",
+        },
+      })
+    );
+    setFeedbackFor(null);
     if (selected?._id) dispatch(fetchInterviewsByApplication(selected._id));
   };
 
@@ -531,26 +559,106 @@ function Pipeline() {
             <div className={styles.ivList}>
               {(byApplication[selected._id] || []).map((iv) => (
                 <div key={iv._id} className={styles.ivItem}>
-                  <div>
-                    <strong>{iv.round}</strong> · {iv.mode}
-                    <div className={styles.ivWhen}>
-                      {new Date(iv.scheduledAt).toLocaleString()}
-                      {iv.interviewer ? ` · ${iv.interviewer}` : ""}
+                  <div className={styles.ivMain}>
+                    <div>
+                      <strong>{iv.round}</strong> · {iv.mode}
+                      <div className={styles.ivWhen}>
+                        {new Date(iv.scheduledAt).toLocaleString()}
+                        {iv.interviewer ? ` · ${iv.interviewer}` : ""}
+                      </div>
+                    </div>
+                    <div className={styles.ivRight}>
+                      <span className={`${styles.ivStatus} ${styles["iv_" + iv.status.replace("-", "")]}`}>
+                        {iv.status}
+                      </span>
+                      {iv.status !== "Cancelled" && (
+                        <button
+                          className={styles.ivCancel}
+                          onClick={() => openFeedback(iv)}
+                        >
+                          {iv.feedback || iv.rating ? "Edit review" : "Review"}
+                        </button>
+                      )}
+                      {iv.status === "Scheduled" && (
+                        <button
+                          className={styles.ivCancel}
+                          onClick={() => handleCancelInterview(iv._id)}
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <div className={styles.ivRight}>
-                    <span className={`${styles.ivStatus} ${styles["iv_" + iv.status.replace("-", "")]}`}>
-                      {iv.status}
-                    </span>
-                    {iv.status === "Scheduled" && (
-                      <button
-                        className={styles.ivCancel}
-                        onClick={() => handleCancelInterview(iv._id)}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
+
+                  {/* Recorded feedback (read-only) */}
+                  {(iv.feedback || iv.rating > 0) && feedbackFor !== iv._id && (
+                    <div className={styles.ivFeedback}>
+                      {iv.rating > 0 && (
+                        <span className={styles.ivStars}>
+                          {"★".repeat(iv.rating)}
+                          {"☆".repeat(5 - iv.rating)}
+                        </span>
+                      )}
+                      {iv.feedback && <span>{iv.feedback}</span>}
+                    </div>
+                  )}
+
+                  {/* Inline review editor */}
+                  {feedbackFor === iv._id && (
+                    <div className={styles.ivReview}>
+                      <div className={styles.ivRow}>
+                        <label>
+                          Outcome
+                          <select
+                            value={fbForm.status}
+                            onChange={(e) =>
+                              setFbForm({ ...fbForm, status: e.target.value })
+                            }
+                          >
+                            <option value="Completed">Completed</option>
+                            <option value="No-show">No-show</option>
+                            <option value="Scheduled">Keep Scheduled</option>
+                          </select>
+                        </label>
+                        <label>
+                          Rating
+                          <div className={styles.starPick}>
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <span
+                                key={n}
+                                className={n <= fbForm.rating ? styles.starOn : styles.starOff}
+                                onClick={() => setFbForm({ ...fbForm, rating: n })}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                        </label>
+                      </div>
+                      <textarea
+                        className={styles.ivFeedbackInput}
+                        placeholder="Interview feedback / notes..."
+                        value={fbForm.feedback}
+                        onChange={(e) =>
+                          setFbForm({ ...fbForm, feedback: e.target.value })
+                        }
+                      />
+                      <div className={styles.ivReviewActions}>
+                        <button
+                          className={styles.ivCancel}
+                          onClick={() => setFeedbackFor(null)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className={styles.ivSaveBtn}
+                          onClick={() => handleSaveFeedback(iv._id)}
+                        >
+                          Save review
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
               {(byApplication[selected._id] || []).length === 0 && !showSchedule && (
