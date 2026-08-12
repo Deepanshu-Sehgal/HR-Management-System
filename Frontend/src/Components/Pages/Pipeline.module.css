@@ -123,6 +123,49 @@
   color: #16a34a;
 }
 
+/* ---- Upcoming interviews ---- */
+.upcomingBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.upcomingTitle {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.upcomingList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.upcomingChip {
+  display: flex;
+  flex-direction: column;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #0369a1;
+}
+.upcomingChip strong {
+  color: #0c4a6e;
+}
+.upcomingMode {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #0284c7;
+}
+
 /* ---- Toolbar ---- */
 .toolbar {
   display: flex;
@@ -433,6 +476,133 @@
   border-radius: 6px;
   padding: 8px 14px;
   cursor: pointer;
+}
+
+/* ---- Interviews (drawer) ---- */
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.sectionHead h4 {
+  margin: 8px 0;
+}
+.scheduleToggle {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.scheduleToggle:hover {
+  background: #1d4ed8;
+}
+.ivForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.ivForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #4b5563;
+  flex: 1;
+}
+.ivForm input,
+.ivForm select {
+  padding: 7px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.ivRow {
+  display: flex;
+  gap: 10px;
+}
+.ivSubmit {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ivSubmit:hover {
+  background: #15803d;
+}
+.ivList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ivItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #1f2937;
+}
+.ivWhen {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+.ivRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ivStatus {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.iv_Scheduled {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.iv_Completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+.iv_Cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.iv_Noshow {
+  background: #fef3c7;
+  color: #b45309;
+}
+.ivCancel {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: #6b7280;
+}
+.ivCancel:hover {
+  background: #f3f4f6;
 }
 
 .timeline {

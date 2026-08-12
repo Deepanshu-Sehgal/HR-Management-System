@@ -11,9 +11,24 @@ import {
   runSlaSweep,
 } from "../../redux/Slices/PipelineSlice";
 import { fetchJobApplications } from "../../redux/Slices/JobApplicationSlice";
+import {
+  fetchUpcomingInterviews,
+  fetchInterviewsByApplication,
+  scheduleInterview,
+  cancelInterview,
+} from "../../redux/Slices/InterviewSlice";
 import styles from "./Pipeline.module.css";
 
 const isOverdue = (dueAt) => dueAt && new Date(dueAt).getTime() < Date.now();
+
+const EMPTY_INTERVIEW = {
+  scheduledAt: "",
+  durationMins: 45,
+  mode: "Video",
+  location: "",
+  interviewer: "",
+  round: "Interview",
+};
 
 function daysInStage(stageEnteredAt) {
   if (!stageEnteredAt) return null;
@@ -26,6 +41,7 @@ function Pipeline() {
   const { activePipeline, columns, funnel, overdue, loading, moving, lastSweep } =
     useSelector((state) => state.pipeline);
   const { applications } = useSelector((state) => state.jobApplication);
+  const { upcoming, byApplication } = useSelector((state) => state.interview);
 
   const [selected, setSelected] = useState(null); // application in detail drawer
   const [note, setNote] = useState("");
@@ -34,6 +50,8 @@ function Pipeline() {
   const [overdueOnly, setOverdueOnly] = useState(false);
   const [dragId, setDragId] = useState(null);
   const [dragOverCol, setDragOverCol] = useState(null);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [ivForm, setIvForm] = useState(EMPTY_INTERVIEW);
 
   const pipelineId = activePipeline?._id;
 
@@ -41,7 +59,17 @@ function Pipeline() {
   useEffect(() => {
     dispatch(ensureDefaultPipeline());
     dispatch(fetchJobApplications());
+    dispatch(fetchUpcomingInterviews());
   }, [dispatch]);
+
+  // When a candidate drawer opens, load that candidate's interviews.
+  useEffect(() => {
+    if (selected?._id) {
+      dispatch(fetchInterviewsByApplication(selected._id));
+      setShowSchedule(false);
+      setIvForm(EMPTY_INTERVIEW);
+    }
+  }, [dispatch, selected?._id]);
 
   useEffect(() => {
     if (pipelineId) {
@@ -98,6 +126,28 @@ function Pipeline() {
     await dispatch(runSlaSweep());
     refresh();
     setSweeping(false);
+  };
+
+  const handleScheduleInterview = async (e) => {
+    e.preventDefault();
+    if (!selected || !ivForm.scheduledAt) return;
+    await dispatch(
+      scheduleInterview({
+        applicationId: selected._id,
+        ...ivForm,
+        durationMins: Number(ivForm.durationMins) || 45,
+        createdBy: "HR",
+      })
+    );
+    // Refresh the candidate's activity timeline (interview logs a system entry).
+    dispatch(fetchInterviewsByApplication(selected._id));
+    setShowSchedule(false);
+    setIvForm(EMPTY_INTERVIEW);
+  };
+
+  const handleCancelInterview = async (id) => {
+    await dispatch(cancelInterview(id));
+    if (selected?._id) dispatch(fetchInterviewsByApplication(selected._id));
   };
 
   // Apply the search + overdue-only filters to a column's cards.
@@ -196,6 +246,22 @@ function Pipeline() {
                   {f.reached}
                 </span>
                 <span className={styles.funnelConv}>{f.conversionFromPrev}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Upcoming interviews */}
+      {upcoming.length > 0 && (
+        <div className={styles.upcomingBar}>
+          <span className={styles.upcomingTitle}>📅 Upcoming interviews</span>
+          <div className={styles.upcomingList}>
+            {upcoming.slice(0, 6).map((iv) => (
+              <div key={iv._id} className={styles.upcomingChip} title={iv.round}>
+                <strong>{iv.candidateName}</strong>
+                <span>{new Date(iv.scheduledAt).toLocaleString()}</span>
+                <span className={styles.upcomingMode}>{iv.mode}</span>
               </div>
             ))}
           </div>
@@ -375,6 +441,120 @@ function Pipeline() {
                 <span className={isOverdue(selected.dueAt) ? styles.danger : ""}>
                   SLA due: {new Date(selected.dueAt).toLocaleDateString()}
                 </span>
+              )}
+            </div>
+
+            {/* Interviews */}
+            <div className={styles.sectionHead}>
+              <h4>Interviews</h4>
+              <button
+                className={styles.scheduleToggle}
+                onClick={() => setShowSchedule((s) => !s)}
+              >
+                {showSchedule ? "Cancel" : "+ Schedule"}
+              </button>
+            </div>
+
+            {showSchedule && (
+              <form className={styles.ivForm} onSubmit={handleScheduleInterview}>
+                <label>
+                  Date &amp; time
+                  <input
+                    type="datetime-local"
+                    value={ivForm.scheduledAt}
+                    onChange={(e) =>
+                      setIvForm({ ...ivForm, scheduledAt: e.target.value })
+                    }
+                    required
+                  />
+                </label>
+                <div className={styles.ivRow}>
+                  <label>
+                    Round
+                    <input
+                      type="text"
+                      value={ivForm.round}
+                      onChange={(e) => setIvForm({ ...ivForm, round: e.target.value })}
+                      placeholder="e.g. Technical Round 1"
+                    />
+                  </label>
+                  <label>
+                    Mode
+                    <select
+                      value={ivForm.mode}
+                      onChange={(e) => setIvForm({ ...ivForm, mode: e.target.value })}
+                    >
+                      <option value="Video">Video</option>
+                      <option value="Phone">Phone</option>
+                      <option value="Onsite">Onsite</option>
+                    </select>
+                  </label>
+                </div>
+                <div className={styles.ivRow}>
+                  <label>
+                    Interviewer
+                    <input
+                      type="text"
+                      value={ivForm.interviewer}
+                      onChange={(e) =>
+                        setIvForm({ ...ivForm, interviewer: e.target.value })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Duration (mins)
+                    <input
+                      type="number"
+                      min="5"
+                      value={ivForm.durationMins}
+                      onChange={(e) =>
+                        setIvForm({ ...ivForm, durationMins: e.target.value })
+                      }
+                    />
+                  </label>
+                </div>
+                <label>
+                  Location / link
+                  <input
+                    type="text"
+                    value={ivForm.location}
+                    onChange={(e) => setIvForm({ ...ivForm, location: e.target.value })}
+                    placeholder="Meeting link or address"
+                  />
+                </label>
+                <button type="submit" className={styles.ivSubmit}>
+                  Schedule &amp; email candidate
+                </button>
+              </form>
+            )}
+
+            <div className={styles.ivList}>
+              {(byApplication[selected._id] || []).map((iv) => (
+                <div key={iv._id} className={styles.ivItem}>
+                  <div>
+                    <strong>{iv.round}</strong> · {iv.mode}
+                    <div className={styles.ivWhen}>
+                      {new Date(iv.scheduledAt).toLocaleString()}
+                      {iv.interviewer ? ` · ${iv.interviewer}` : ""}
+                    </div>
+                  </div>
+                  <div className={styles.ivRight}>
+                    <span className={`${styles.ivStatus} ${styles["iv_" + iv.status.replace("-", "")]}`}>
+                      {iv.status}
+                    </span>
+                    {iv.status === "Scheduled" && (
+                      <button
+                        className={styles.ivCancel}
+                        onClick={() => handleCancelInterview(iv._id)}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {(byApplication[selected._id] || []).length === 0 && !showSchedule && (
+                <p className={styles.muted}>No interviews scheduled.</p>
               )}
             </div>
 
