@@ -21,6 +21,8 @@ const aiRoutes = require("./routes/aiRoutes");
 const pipelineRoutes = require("./routes/pipelineRoutes");
 const pipelineController = require("./controllers/pipelineController");
 const interviewRoutes = require("./routes/interviewRoutes");
+const onboardingRoutes = require("./routes/onboardingRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -121,6 +123,8 @@ app.use("/api/policies", policyRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/pipelines", pipelineRoutes);
 app.use("/api/interviews", interviewRoutes);
+app.use("/api/onboarding", onboardingRoutes);
+app.use("/api/tickets", ticketRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 

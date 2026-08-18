@@ -27,6 +27,8 @@ const Dashboard = () => {
     "/dashboard/employees": "Employees",
     "/dashboard/attendance": "Attendance",
     "/dashboard/leaves": "Leaves",
+    "/dashboard/onboarding": "Employee Onboarding",
+    "/dashboard/helpdesk": "HR Helpdesk",
     "/dashboard/ai-assistant": "AI Assistant",
     "/dashboard/hr-management": "HR Management",
   };
@@ -150,6 +152,24 @@ const Dashboard = () => {
             <img src={Shine} alt="Leaves" className={dash.icon} />
             Leaves
           </Link>
+          <Link
+            to="/dashboard/onboarding"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/onboarding" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/onboarding" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={UserAdd}
+              alt="Onboarding"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/onboarding" ? dash.activeIcon : ""
+              }`}
+            />
+            Onboarding
+          </Link>
         </div>
 
         <div className={dash.menuSection}>
@@ -165,6 +185,24 @@ const Dashboard = () => {
             )}
             <img src={Work} alt="HR Management" className={dash.icon} />
             HR Management
+          </Link>
+          <Link
+            to="/dashboard/helpdesk"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/helpdesk" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/helpdesk" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={Mail}
+              alt="Helpdesk"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/helpdesk" ? dash.activeIcon : ""
+              }`}
+            />
+            Helpdesk
           </Link>
         </div>
 
