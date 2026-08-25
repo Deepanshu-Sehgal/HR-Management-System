@@ -9,6 +9,10 @@ import {
   enrollApplication,
   addActivity,
   runSlaSweep,
+  addTask,
+  updateTask,
+  deleteTask,
+  fetchTasks,
 } from "../../redux/Slices/PipelineSlice";
 import { fetchJobApplications } from "../../redux/Slices/JobApplicationSlice";
 import {
@@ -31,6 +35,10 @@ const EMPTY_INTERVIEW = {
   round: "Interview",
 };
 
+const EMPTY_TASK = { title: "", assignedTo: "", dueDate: "", priority: "Medium" };
+
+const openTaskCount = (app) => (app.tasks || []).filter((t) => !t.done).length;
+
 function daysInStage(stageEnteredAt) {
   if (!stageEnteredAt) return null;
   const ms = Date.now() - new Date(stageEnteredAt).getTime();
@@ -43,6 +51,7 @@ function Pipeline() {
     useSelector((state) => state.pipeline);
   const { applications } = useSelector((state) => state.jobApplication);
   const { upcoming, byApplication } = useSelector((state) => state.interview);
+  const { tasks } = useSelector((state) => state.pipeline);
 
   const [selected, setSelected] = useState(null); // application in detail drawer
   const [note, setNote] = useState("");
@@ -55,6 +64,8 @@ function Pipeline() {
   const [ivForm, setIvForm] = useState(EMPTY_INTERVIEW);
   const [feedbackFor, setFeedbackFor] = useState(null); // interview id being reviewed
   const [fbForm, setFbForm] = useState({ status: "Completed", rating: 0, feedback: "" });
+  const [showTasks, setShowTasks] = useState(false); // task tracker panel
+  const [taskForm, setTaskForm] = useState(EMPTY_TASK);
 
   const pipelineId = activePipeline?._id;
 
@@ -79,6 +90,7 @@ function Pipeline() {
       dispatch(fetchBoard(pipelineId));
       dispatch(fetchFunnel(pipelineId));
       dispatch(fetchOverdue(pipelineId));
+      dispatch(fetchTasks({ pipelineId, open: "true" }));
     }
   }, [dispatch, pipelineId]);
 
@@ -129,6 +141,51 @@ function Pipeline() {
     await dispatch(runSlaSweep());
     refresh();
     setSweeping(false);
+  };
+
+  // Refresh the open-task tracker after any task change.
+  const refreshTasks = () => {
+    if (pipelineId) dispatch(fetchTasks({ pipelineId, open: "true" }));
+  };
+
+  const handleAddTask = async (e) => {
+    e.preventDefault();
+    if (!taskForm.title.trim() || !selected) return;
+    const res = await dispatch(
+      addTask({ applicationId: selected._id, ...taskForm, by: "HR" })
+    );
+    if (res.payload) setSelected(res.payload);
+    setTaskForm(EMPTY_TASK);
+    refreshTasks();
+  };
+
+  const handleToggleTask = async (task) => {
+    if (!selected) return;
+    const res = await dispatch(
+      updateTask({ applicationId: selected._id, taskId: task._id, done: !task.done, by: "HR" })
+    );
+    if (res.payload) setSelected(res.payload);
+    refreshTasks();
+  };
+
+  const handleDeleteTask = async (task) => {
+    if (!selected) return;
+    const res = await dispatch(
+      deleteTask({ applicationId: selected._id, taskId: task._id })
+    );
+    if (res.payload) setSelected(res.payload);
+    refreshTasks();
+  };
+
+  // Open the candidate drawer for a task in the tracker panel.
+  const openCandidateForTask = (t) => {
+    for (const col of columns) {
+      const app = col.applications.find((a) => a._id === t.applicationId);
+      if (app) {
+        setSelected(app);
+        return;
+      }
+    }
   };
 
   const handleScheduleInterview = async (e) => {
@@ -232,11 +289,70 @@ function Pipeline() {
           </p>
         </div>
         <div className={styles.headerActions}>
+          <button
+            className={styles.tasksBtn}
+            onClick={() => setShowTasks((s) => !s)}
+          >
+            ✓ Tasks
+            {tasks.length > 0 && <span className={styles.taskCountPill}>{tasks.length}</span>}
+          </button>
           <button className={styles.sweepBtn} onClick={handleSweep} disabled={sweeping}>
             {sweeping ? "Running..." : "⚙ Run Automation Now"}
           </button>
         </div>
       </div>
+
+      {/* Task tracker: all open tasks across the pipeline */}
+      {showTasks && (
+        <div className={styles.taskTracker}>
+          <div className={styles.taskTrackerHead}>
+            <strong>Open tasks ({tasks.length})</strong>
+            <button className={styles.closeInline} onClick={() => setShowTasks(false)}>
+              ✕
+            </button>
+          </div>
+          {tasks.length === 0 ? (
+            <p className={styles.muted}>No open tasks. 🎉</p>
+          ) : (
+            <table className={styles.taskTable}>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Candidate</th>
+                  <th>Priority</th>
+                  <th>Due</th>
+                  <th>Owner</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((t) => (
+                  <tr
+                    key={t._id}
+                    className={`${styles.taskRow} ${t.overdue ? styles.taskRowOverdue : ""}`}
+                    onClick={() => openCandidateForTask(t)}
+                  >
+                    <td>{t.title}</td>
+                    <td>
+                      {t.applicantName}
+                      <span className={styles.taskJob}> · {t.jobTitle}</span>
+                    </td>
+                    <td>
+                      <span className={`${styles.tprio} ${styles["tp_" + t.priority]}`}>
+                        {t.priority}
+                      </span>
+                    </td>
+                    <td className={t.overdue ? styles.danger : ""}>
+                      {t.dueDate ? new Date(t.dueDate).toLocaleDateString() : "—"}
+                      {t.overdue && " ⚠"}
+                    </td>
+                    <td>{t.assignedTo || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {lastSweep && (
         <div className={styles.sweepResult}>
@@ -379,6 +495,11 @@ function Pipeline() {
                       {app.stageEnteredAt && (
                         <span>⏱ {daysInStage(app.stageEnteredAt)}d in stage</span>
                       )}
+                      {openTaskCount(app) > 0 && (
+                        <span className={styles.taskBadge}>
+                          ✓ {openTaskCount(app)} task{openTaskCount(app) > 1 ? "s" : ""}
+                        </span>
+                      )}
                     </div>
                     {isOverdue(app.dueAt) && (
                       <div className={styles.overdueNote}>
@@ -471,6 +592,82 @@ function Pipeline() {
                 </span>
               )}
             </div>
+
+            {/* Tasks */}
+            <h4>Tasks</h4>
+            <div className={styles.taskDrawerList}>
+              {(selected.tasks || []).map((t) => {
+                const tOverdue =
+                  !t.done && t.dueDate && new Date(t.dueDate).getTime() < Date.now();
+                return (
+                  <div
+                    key={t._id}
+                    className={`${styles.drawerTask} ${tOverdue ? styles.drawerTaskOverdue : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={t.done}
+                      onChange={() => handleToggleTask(t)}
+                    />
+                    <span className={styles.drawerTaskBody}>
+                      <span className={t.done ? styles.taskDoneText : ""}>{t.title}</span>
+                      <span className={styles.drawerTaskMeta}>
+                        <span className={`${styles.tprio} ${styles["tp_" + t.priority]}`}>
+                          {t.priority}
+                        </span>
+                        {t.dueDate && (
+                          <span className={tOverdue ? styles.danger : ""}>
+                            due {new Date(t.dueDate).toLocaleDateString()}
+                          </span>
+                        )}
+                        {t.assignedTo && <span>👤 {t.assignedTo}</span>}
+                      </span>
+                    </span>
+                    <button
+                      className={styles.taskDelBtn}
+                      onClick={() => handleDeleteTask(t)}
+                      title="Delete task"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+              {(!selected.tasks || selected.tasks.length === 0) && (
+                <p className={styles.muted}>No tasks yet.</p>
+              )}
+            </div>
+
+            <form className={styles.taskForm} onSubmit={handleAddTask}>
+              <input
+                type="text"
+                placeholder="New task..."
+                value={taskForm.title}
+                onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
+              />
+              <div className={styles.taskFormRow}>
+                <input
+                  type="text"
+                  placeholder="Owner"
+                  value={taskForm.assignedTo}
+                  onChange={(e) => setTaskForm({ ...taskForm, assignedTo: e.target.value })}
+                />
+                <select
+                  value={taskForm.priority}
+                  onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+                <input
+                  type="date"
+                  value={taskForm.dueDate}
+                  onChange={(e) => setTaskForm({ ...taskForm, dueDate: e.target.value })}
+                />
+                <button type="submit">Add</button>
+              </div>
+            </form>
 
             {/* Interviews */}
             <div className={styles.sectionHead}>

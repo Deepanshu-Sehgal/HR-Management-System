@@ -123,6 +123,197 @@
   color: #16a34a;
 }
 
+/* ---- Task tracker ---- */
+.tasksBtn {
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tasksBtn:hover {
+  background: #0284c7;
+}
+.taskCountPill {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 0 7px;
+  font-size: 12px;
+}
+.taskTracker {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+.taskTrackerHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+.closeInline {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #6b7280;
+}
+.taskTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.taskTable th {
+  text-align: left;
+  padding: 8px 10px;
+  color: #6b7280;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #eee;
+}
+.taskRow {
+  cursor: pointer;
+}
+.taskRow td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #f1f1f1;
+  color: #1f2937;
+}
+.taskRow:hover {
+  background: #f9fafb;
+}
+.taskRowOverdue {
+  background: #fef2f2;
+}
+.taskJob {
+  color: #9ca3af;
+  font-size: 12px;
+}
+.tprio {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+.tp_Low {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.tp_Medium {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.tp_High {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.taskBadge {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+
+/* ---- Tasks in drawer ---- */
+.taskDrawerList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.drawerTask {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.drawerTask input[type="checkbox"] {
+  margin-top: 3px;
+}
+.drawerTaskOverdue {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+.drawerTaskBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  font-size: 14px;
+  color: #1f2937;
+}
+.taskDoneText {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+.drawerTaskMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #6b7280;
+}
+.taskDelBtn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 13px;
+}
+.taskDelBtn:hover {
+  color: #dc2626;
+}
+.taskForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 14px;
+}
+.taskForm > input {
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.taskFormRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.taskFormRow input,
+.taskFormRow select {
+  padding: 7px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  flex: 1;
+  min-width: 90px;
+}
+.taskFormRow button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
 /* ---- Upcoming interviews ---- */
 .upcomingBar {
   display: flex;

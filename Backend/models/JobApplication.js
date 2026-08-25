@@ -119,6 +119,22 @@ const JobApplicationSchema = new mongoose.Schema({
       _id: false,
     },
   ],
+  // Actionable to-do items HR must complete for this candidate.
+  tasks: [
+    {
+      title: { type: String, required: true, trim: true },
+      assignedTo: { type: String, default: "" },
+      dueDate: { type: Date },
+      priority: {
+        type: String,
+        enum: ["Low", "Medium", "High"],
+        default: "Medium",
+      },
+      done: { type: Boolean, default: false },
+      completedAt: { type: Date },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 JobApplicationSchema.index({ jobOpeningId: 1, email: 1 });

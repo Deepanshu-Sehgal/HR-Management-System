@@ -321,6 +321,127 @@ exports.addActivity = async (req, res) => {
   }
 };
 
+// ----- Tasks (per-application to-dos) -----
+
+// Add a task to an application and log it on the activity timeline.
+exports.addTask = async (req, res) => {
+  try {
+    const { title, assignedTo, dueDate, priority, by } = req.body;
+    if (!title) return res.status(400).json({ message: "title is required" });
+    const app = await JobApplication.findById(req.params.id);
+    if (!app) return res.status(404).json({ message: "Application not found" });
+
+    app.tasks.push({
+      title,
+      assignedTo: assignedTo || "",
+      dueDate: dueDate || undefined,
+      priority: priority || "Medium",
+    });
+    app.activities.push({
+      type: "system",
+      message: `Task added: ${title}`,
+      by: by || "HR",
+    });
+    await app.save();
+    res.status(200).json({ message: "Task added", application: app });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update a task (toggle done, reassign, reschedule, reprioritize).
+exports.updateTask = async (req, res) => {
+  try {
+    const app = await JobApplication.findById(req.params.id);
+    if (!app) return res.status(404).json({ message: "Application not found" });
+    const task = app.tasks.id(req.params.taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    const { title, assignedTo, dueDate, priority, done, by } = req.body;
+    if (title !== undefined) task.title = title;
+    if (assignedTo !== undefined) task.assignedTo = assignedTo;
+    if (dueDate !== undefined) task.dueDate = dueDate || undefined;
+    if (priority !== undefined) task.priority = priority;
+    if (done !== undefined) {
+      task.done = done;
+      task.completedAt = done ? new Date() : undefined;
+      app.activities.push({
+        type: "system",
+        message: `Task ${done ? "completed" : "reopened"}: ${task.title}`,
+        by: by || "HR",
+      });
+    }
+    await app.save();
+    res.status(200).json({ message: "Task updated", application: app });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete a task from an application.
+exports.deleteTask = async (req, res) => {
+  try {
+    const app = await JobApplication.findById(req.params.id);
+    if (!app) return res.status(404).json({ message: "Application not found" });
+    const task = app.tasks.id(req.params.taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+    task.deleteOne();
+    await app.save();
+    res.status(200).json({ message: "Task deleted", application: app });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Cross-application task tracker: flatten all tasks (optionally filtered by
+// pipeline / open / overdue / assignee) with candidate context attached.
+exports.getTasks = async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.pipelineId) filter.pipelineId = req.query.pipelineId;
+    const apps = await JobApplication.find({ ...filter, "tasks.0": { $exists: true } });
+
+    const now = new Date();
+    let tasks = [];
+    apps.forEach((app) => {
+      (app.tasks || []).forEach((t) => {
+        tasks.push({
+          _id: t._id,
+          applicationId: app._id,
+          applicantName: app.applicantName,
+          jobTitle: app.jobTitle,
+          stageKey: app.stageKey,
+          title: t.title,
+          assignedTo: t.assignedTo,
+          dueDate: t.dueDate,
+          priority: t.priority,
+          done: t.done,
+          overdue: !t.done && t.dueDate && new Date(t.dueDate) < now,
+        });
+      });
+    });
+
+    if (req.query.open === "true") tasks = tasks.filter((t) => !t.done);
+    if (req.query.overdue === "true") tasks = tasks.filter((t) => t.overdue);
+    if (req.query.assignedTo)
+      tasks = tasks.filter((t) => t.assignedTo === req.query.assignedTo);
+
+    // Open first, then by due date (undated last), then by priority.
+    const prio = { High: 0, Medium: 1, Low: 2 };
+    tasks.sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      const ad = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+      const bd = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+      if (ad !== bd) return ad - bd;
+      return (prio[a.priority] ?? 1) - (prio[b.priority] ?? 1);
+    });
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // ----- Analytics -----
 
 // Funnel metrics for a pipeline: count + stage-to-stage conversion rate.

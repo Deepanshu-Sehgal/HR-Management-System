@@ -104,6 +104,51 @@ export const runSlaSweep = createAsyncThunk("pipeline/runSlaSweep", async () => 
   return response.data;
 });
 
+// ----- Per-application tasks -----
+export const addTask = createAsyncThunk(
+  "pipeline/addTask",
+  async ({ applicationId, ...data }) => {
+    const response = await axios.post(
+      `${PIPELINES_URL}/applications/${applicationId}/tasks`,
+      data
+    );
+    return response.data.application;
+  }
+);
+
+export const updateTask = createAsyncThunk(
+  "pipeline/updateTask",
+  async ({ applicationId, taskId, ...data }) => {
+    const response = await axios.patch(
+      `${PIPELINES_URL}/applications/${applicationId}/tasks/${taskId}`,
+      data
+    );
+    return response.data.application;
+  }
+);
+
+export const deleteTask = createAsyncThunk(
+  "pipeline/deleteTask",
+  async ({ applicationId, taskId }) => {
+    const response = await axios.delete(
+      `${PIPELINES_URL}/applications/${applicationId}/tasks/${taskId}`
+    );
+    return response.data.application;
+  }
+);
+
+// Cross-application task tracker list.
+export const fetchTasks = createAsyncThunk(
+  "pipeline/fetchTasks",
+  async (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v !== "" && v != null)
+    ).toString();
+    const response = await axios.get(`${PIPELINES_URL}/tasks${qs ? `?${qs}` : ""}`);
+    return response.data;
+  }
+);
+
 const initialState = {
   pipelines: [],
   activePipeline: null,
@@ -114,7 +159,22 @@ const initialState = {
   moving: false,
   error: null,
   lastSweep: null,
+  tasks: [],
 };
+
+// Replace an application in its current column without reordering it, and
+// recompute per-column task/overdue counts. Used after task edits.
+function replaceApp(state, application) {
+  if (!application) return;
+  const now = Date.now();
+  state.columns.forEach((col) => {
+    const i = col.applications.findIndex((a) => a._id === application._id);
+    if (i !== -1) col.applications[i] = application;
+    col.overdueCount = col.applications.filter(
+      (a) => a.dueAt && new Date(a.dueAt).getTime() < now
+    ).length;
+  });
+}
 
 // Move an application object between columns in local state after a stage change.
 function relocate(state, application) {
@@ -200,6 +260,18 @@ const PipelineSlice = createSlice({
       })
       .addCase(runSlaSweep.fulfilled, (state, action) => {
         state.lastSweep = action.payload;
+      })
+      .addCase(addTask.fulfilled, (state, action) => {
+        replaceApp(state, action.payload);
+      })
+      .addCase(updateTask.fulfilled, (state, action) => {
+        replaceApp(state, action.payload);
+      })
+      .addCase(deleteTask.fulfilled, (state, action) => {
+        replaceApp(state, action.payload);
+      })
+      .addCase(fetchTasks.fulfilled, (state, action) => {
+        state.tasks = action.payload;
       });
   },
 });
