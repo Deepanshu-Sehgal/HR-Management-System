@@ -17,6 +17,8 @@ import pipeline from "./Slices/PipelineSlice";
 import interview from "./Slices/InterviewSlice";
 import onboarding from "./Slices/OnboardingSlice";
 import ticket from "./Slices/TicketSlice";
+import offer from "./Slices/OfferSlice";
+import recruitmentAnalytics from "./Slices/RecruitmentAnalyticsSlice";
 import { CandidateApi } from "./Services/CandidateApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { EmployeeApi } from "./Services/EmployeeApi";
@@ -42,6 +44,8 @@ export const store = configureStore({
     interview: interview,
     onboarding: onboarding,
     ticket: ticket,
+    offer: offer,
+    recruitmentAnalytics: recruitmentAnalytics,
     [CandidateApi.reducerPath]: CandidateApi.reducer,
     [EmployeeApi.reducerPath]: EmployeeApi.reducer,
     [LeaveApi.reducerPath]: LeaveApi.reducer,

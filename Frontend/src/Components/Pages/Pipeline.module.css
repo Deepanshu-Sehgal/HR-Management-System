@@ -314,6 +314,57 @@
   cursor: pointer;
 }
 
+/* ---- Offers (drawer) ---- */
+.offerSendToggle {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  font-size: 13px !important;
+}
+.offerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.offerStatus {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.of_Draft {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.of_Sent {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.of_Accepted {
+  background: #dcfce7;
+  color: #15803d;
+}
+.of_Declined {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.of_Expired {
+  background: #fef3c7;
+  color: #b45309;
+}
+.of_Withdrawn {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.onboardHint {
+  font-size: 11px;
+  color: #15803d;
+  font-weight: 600;
+}
+
 /* ---- Upcoming interviews ---- */
 .upcomingBar {
   display: flex;

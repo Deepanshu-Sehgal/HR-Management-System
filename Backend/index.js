@@ -23,6 +23,9 @@ const pipelineController = require("./controllers/pipelineController");
 const interviewRoutes = require("./routes/interviewRoutes");
 const onboardingRoutes = require("./routes/onboardingRoutes");
 const ticketRoutes = require("./routes/ticketRoutes");
+const offerRoutes = require("./routes/offerRoutes");
+const offerController = require("./controllers/offerController");
+const recruitmentAnalyticsRoutes = require("./routes/recruitmentAnalyticsRoutes");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -125,6 +128,8 @@ app.use("/api/pipelines", pipelineRoutes);
 app.use("/api/interviews", interviewRoutes);
 app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/offers", offerRoutes);
+app.use("/api/recruitment-analytics", recruitmentAnalyticsRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
@@ -168,6 +173,10 @@ if (sweepMinutes > 0) {
     pipelineController.runSlaSweep().catch((err) =>
       logger.error(`Scheduled SLA sweep failed: ${err.message}`)
     );
+    // Expire stale sent offers in the same cadence.
+    offerController.runExpirySweep().catch((err) =>
+      logger.error(`Scheduled offer expiry sweep failed: ${err.message}`)
+    );
   }, sweepMinutes * 60 * 1000);
-  logger.info(`Pipeline SLA sweep scheduled every ${sweepMinutes} minute(s)`);
+  logger.info(`Pipeline SLA + offer expiry sweep scheduled every ${sweepMinutes} minute(s)`);
 }

@@ -22,6 +22,13 @@ import {
   cancelInterview,
   updateInterview,
 } from "../../redux/Slices/InterviewSlice";
+import {
+  fetchOffersByApplication,
+  createOffer,
+  sendOffer,
+  respondOffer,
+  deleteOffer,
+} from "../../redux/Slices/OfferSlice";
 import styles from "./Pipeline.module.css";
 
 const isOverdue = (dueAt) => dueAt && new Date(dueAt).getTime() < Date.now();
@@ -36,6 +43,15 @@ const EMPTY_INTERVIEW = {
 };
 
 const EMPTY_TASK = { title: "", assignedTo: "", dueDate: "", priority: "Medium" };
+
+const EMPTY_OFFER = {
+  salary: "",
+  currency: "USD",
+  joiningDate: "",
+  expiryDate: "",
+  notes: "",
+  send: true,
+};
 
 const openTaskCount = (app) => (app.tasks || []).filter((t) => !t.done).length;
 
@@ -52,6 +68,7 @@ function Pipeline() {
   const { applications } = useSelector((state) => state.jobApplication);
   const { upcoming, byApplication } = useSelector((state) => state.interview);
   const { tasks } = useSelector((state) => state.pipeline);
+  const offersByApp = useSelector((state) => state.offer.byApplication);
 
   const [selected, setSelected] = useState(null); // application in detail drawer
   const [note, setNote] = useState("");
@@ -66,6 +83,8 @@ function Pipeline() {
   const [fbForm, setFbForm] = useState({ status: "Completed", rating: 0, feedback: "" });
   const [showTasks, setShowTasks] = useState(false); // task tracker panel
   const [taskForm, setTaskForm] = useState(EMPTY_TASK);
+  const [showOfferForm, setShowOfferForm] = useState(false);
+  const [offerForm, setOfferForm] = useState(EMPTY_OFFER);
 
   const pipelineId = activePipeline?._id;
 
@@ -76,12 +95,15 @@ function Pipeline() {
     dispatch(fetchUpcomingInterviews());
   }, [dispatch]);
 
-  // When a candidate drawer opens, load that candidate's interviews.
+  // When a candidate drawer opens, load that candidate's interviews + offers.
   useEffect(() => {
     if (selected?._id) {
       dispatch(fetchInterviewsByApplication(selected._id));
+      dispatch(fetchOffersByApplication(selected._id));
       setShowSchedule(false);
       setIvForm(EMPTY_INTERVIEW);
+      setShowOfferForm(false);
+      setOfferForm(EMPTY_OFFER);
     }
   }, [dispatch, selected?._id]);
 
@@ -186,6 +208,37 @@ function Pipeline() {
         return;
       }
     }
+  };
+
+  // ---- Offers ----
+  const handleCreateOffer = async (e) => {
+    e.preventDefault();
+    if (!selected || !offerForm.salary) return;
+    await dispatch(
+      createOffer({
+        applicationId: selected._id,
+        department: selected.department || "",
+        ...offerForm,
+        salary: Number(offerForm.salary) || 0,
+        createdBy: "HR",
+      })
+    );
+    setShowOfferForm(false);
+    setOfferForm(EMPTY_OFFER);
+  };
+
+  const handleSendOffer = async (id) => {
+    await dispatch(sendOffer(id));
+  };
+
+  const handleRespondOffer = async (id, status) => {
+    await dispatch(respondOffer({ id, status, by: "HR" }));
+    // Acceptance advances the candidate + spawns onboarding server-side.
+    if (status === "Accepted") refresh();
+  };
+
+  const handleDeleteOffer = async (id) => {
+    await dispatch(deleteOffer({ id }));
   };
 
   const handleScheduleInterview = async (e) => {
@@ -668,6 +721,147 @@ function Pipeline() {
                 <button type="submit">Add</button>
               </div>
             </form>
+
+            {/* Offers */}
+            <div className={styles.sectionHead}>
+              <h4>Offer</h4>
+              <button
+                className={styles.scheduleToggle}
+                onClick={() => setShowOfferForm((s) => !s)}
+              >
+                {showOfferForm ? "Cancel" : "+ Create offer"}
+              </button>
+            </div>
+
+            {showOfferForm && (
+              <form className={styles.ivForm} onSubmit={handleCreateOffer}>
+                <div className={styles.ivRow}>
+                  <label>
+                    Salary
+                    <input
+                      type="number"
+                      min="0"
+                      value={offerForm.salary}
+                      onChange={(e) => setOfferForm({ ...offerForm, salary: e.target.value })}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Currency
+                    <select
+                      value={offerForm.currency}
+                      onChange={(e) => setOfferForm({ ...offerForm, currency: e.target.value })}
+                    >
+                      <option>USD</option>
+                      <option>INR</option>
+                      <option>EUR</option>
+                      <option>GBP</option>
+                    </select>
+                  </label>
+                </div>
+                <div className={styles.ivRow}>
+                  <label>
+                    Joining date
+                    <input
+                      type="date"
+                      value={offerForm.joiningDate}
+                      onChange={(e) => setOfferForm({ ...offerForm, joiningDate: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Respond by
+                    <input
+                      type="date"
+                      value={offerForm.expiryDate}
+                      onChange={(e) => setOfferForm({ ...offerForm, expiryDate: e.target.value })}
+                    />
+                  </label>
+                </div>
+                <label>
+                  Notes
+                  <input
+                    type="text"
+                    value={offerForm.notes}
+                    onChange={(e) => setOfferForm({ ...offerForm, notes: e.target.value })}
+                    placeholder="Optional"
+                  />
+                </label>
+                <label className={styles.offerSendToggle}>
+                  <input
+                    type="checkbox"
+                    checked={offerForm.send}
+                    onChange={(e) => setOfferForm({ ...offerForm, send: e.target.checked })}
+                  />
+                  Email the offer to the candidate now
+                </label>
+                <button type="submit" className={styles.ivSubmit}>
+                  {offerForm.send ? "Create & send offer" : "Save draft"}
+                </button>
+              </form>
+            )}
+
+            <div className={styles.ivList}>
+              {(offersByApp[selected._id] || []).map((o) => (
+                <div key={o._id} className={styles.ivItem}>
+                  <div className={styles.ivMain}>
+                    <div>
+                      <strong>
+                        {o.currency} {Number(o.salary).toLocaleString()}
+                      </strong>
+                      <div className={styles.ivWhen}>
+                        {o.joiningDate
+                          ? `Joins ${new Date(o.joiningDate).toLocaleDateString()}`
+                          : "No joining date"}
+                        {o.expiryDate
+                          ? ` · expires ${new Date(o.expiryDate).toLocaleDateString()}`
+                          : ""}
+                      </div>
+                    </div>
+                    <div className={styles.ivRight}>
+                      <span className={`${styles.offerStatus} ${styles["of_" + o.status]}`}>
+                        {o.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.offerActions}>
+                    {o.status === "Draft" && (
+                      <button className={styles.ivSaveBtn} onClick={() => handleSendOffer(o._id)}>
+                        Send
+                      </button>
+                    )}
+                    {o.status === "Sent" && (
+                      <>
+                        <button
+                          className={styles.ivSaveBtn}
+                          onClick={() => handleRespondOffer(o._id, "Accepted")}
+                        >
+                          Mark accepted
+                        </button>
+                        <button
+                          className={styles.ivCancel}
+                          onClick={() => handleRespondOffer(o._id, "Declined")}
+                        >
+                          Declined
+                        </button>
+                      </>
+                    )}
+                    {o.status === "Accepted" && o.onboardingId && (
+                      <span className={styles.onboardHint}>✓ Onboarding created</span>
+                    )}
+                    <button
+                      className={styles.taskDelBtn}
+                      onClick={() => handleDeleteOffer(o._id)}
+                      title="Delete offer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {(offersByApp[selected._id] || []).length === 0 && !showOfferForm && (
+                <p className={styles.muted}>No offer yet.</p>
+              )}
+            </div>
 
             {/* Interviews */}
             <div className={styles.sectionHead}>
