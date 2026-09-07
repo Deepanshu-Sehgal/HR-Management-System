@@ -13,12 +13,20 @@ import Departments from "./Components/Pages/Departments";
 import PerformanceReviews from "./Components/Pages/PerformanceReviews";
 import Payroll from "./Components/Pages/Payroll";
 import Recruitment from "./Components/Pages/Recruitment";
+import Pipeline from "./Components/Pages/Pipeline";
+import Onboarding from "./Components/Pages/Onboarding";
+import Helpdesk from "./Components/Pages/Helpdesk";
+import RecruitmentAnalytics from "./Components/Pages/RecruitmentAnalytics";
 import Announcements from "./Components/Pages/Announcements";
 import Documents from "./Components/Pages/Documents";
 import AttendanceAnalytics from "./Components/Pages/AttendanceAnalytics";
 import Reports from "./Components/Pages/Reports";
 import Subscription from "./Components/Pages/Subscription";
 import AiAssistant from "./Components/Pages/AiAssistant";
+import HRManagement from "./Components/Pages/HRManagement";
+import Landing from "./Components/Pages/Landing";
+import LegalPage from "./Components/Pages/LegalPage";
+import ContentPages from "./Components/Pages/ContentPages";
 
 function App() {
   return (
@@ -45,13 +53,21 @@ function App() {
           <Route path="performance" element={<PerformanceReviews />} />
           <Route path="payroll" element={<Payroll />} />
           <Route path="recruitment" element={<Recruitment />} />
+          <Route path="pipeline" element={<Pipeline />} />
+          <Route path="recruitment-analytics" element={<RecruitmentAnalytics />} />
+          <Route path="onboarding" element={<Onboarding />} />
+          <Route path="helpdesk" element={<Helpdesk />} />
           <Route path="announcements" element={<Announcements />} />
           <Route path="documents" element={<Documents />} />
           <Route path="attendance-analytics" element={<AttendanceAnalytics />} />
           <Route path="reports" element={<Reports />} />
           <Route path="subscription" element={<Subscription />} />
           <Route path="ai-assistant" element={<AiAssistant />} />
+          <Route path="hr-management" element={<HRManagement />} />
+          <Route path="content-pages" element={<ContentPages />} />
         </Route>
+        <Route path="landing" element={<Landing />} />
+        <Route path="legal/:slug" element={<LegalPage />} />
       </Routes>
     </Router>
   );

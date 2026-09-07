@@ -8,12 +8,28 @@ An end-to-end Human Resource Management System developed using the MERN stack (M
 
 - 🔐 Role-Based Authentication (Admin, HR, Employee)
 - 👤 Employee Management (Add, Update, Delete, View)
+- 🔎 Advanced Employee Search and Filter by name, email, department, and position
+- 📤 Export Employee Data to CSV
 - 🕒 Attendance Tracking with In/Out Timings
 - 📅 Leave Management System
 - 💰 Payroll Generation and Salary Slips
 - 📊 HR Dashboard with Analytics and Reports
+- 🤝 Skill-Based Job Matching for open roles
+- 🧠 AI Interview Question Generator for HR hiring workflows
+- 📋 AI Onboarding Checklist Creator for new hires
+- 📈 HR Analytics Overview with attendance, performance, and skill gap insights
 - 📧 Email Notifications for Leave and Payroll Actions
 - 📁 Document Upload (Resume, Offer Letters, etc.)
+- 🧾 Expense Reimbursement Requests and Approval Tracking
+- 🎯 Performance Reviews with Goal Setting and Feedback
+- 📚 Training & Development Tracking for employee skills
+- 🗓 Shift Scheduling, Roster Management, and Work Pattern Support
+- 📢 Company Announcements and HR News Feed
+- 📂 Policy & Document Acknowledgement Workflow
+- 🔍 Candidate Pipeline Tracking with Application Status
+- 🧠 AI Resume Screening and Interview Question Suggestions
+- 🌐 Employee Self-Service Portal for leave, documents, and profile updates
+- 🔒 Audit Trail for HR actions and change history
 
 ---
 

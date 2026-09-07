@@ -63,6 +63,78 @@ const JobApplicationSchema = new mongoose.Schema({
   remarks: {
     type: String,
   },
+
+  // ----- Pipeline (ATS) fields -----
+  // Reference to the Pipeline this application is enrolled in.
+  pipelineId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Pipeline",
+    default: null,
+  },
+  // Current stage key within the pipeline (matches Pipeline.stages[].key).
+  stageKey: {
+    type: String,
+    default: null,
+  },
+  // When the application entered its current stage (used for time-in-stage).
+  stageEnteredAt: {
+    type: Date,
+  },
+  // SLA deadline for the current stage; overdue when now > dueAt.
+  dueAt: {
+    type: Date,
+    default: null,
+  },
+  // Recruiter / HR owner responsible for this application.
+  assignedTo: {
+    type: String,
+    default: "",
+  },
+  tags: {
+    type: [String],
+    default: [],
+  },
+  // Ordered log of stage transitions.
+  stageHistory: [
+    {
+      fromStage: { type: String },
+      toStage: { type: String },
+      movedAt: { type: Date, default: Date.now },
+      movedBy: { type: String, default: "" },
+      note: { type: String, default: "" },
+      _id: false,
+    },
+  ],
+  // Free-form activity timeline (comments, emails sent, system events).
+  activities: [
+    {
+      type: {
+        type: String,
+        enum: ["note", "email", "stage", "system"],
+        default: "note",
+      },
+      message: { type: String, default: "" },
+      at: { type: Date, default: Date.now },
+      by: { type: String, default: "" },
+      _id: false,
+    },
+  ],
+  // Actionable to-do items HR must complete for this candidate.
+  tasks: [
+    {
+      title: { type: String, required: true, trim: true },
+      assignedTo: { type: String, default: "" },
+      dueDate: { type: Date },
+      priority: {
+        type: String,
+        enum: ["Low", "Medium", "High"],
+        default: "Medium",
+      },
+      done: { type: Boolean, default: false },
+      completedAt: { type: Date },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 JobApplicationSchema.index({ jobOpeningId: 1, email: 1 });

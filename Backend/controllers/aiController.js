@@ -263,3 +263,118 @@ exports.summarizeText = async (req, res) => {
     res.status(500).json({ message: "Unable to summarize text.", error: error.message });
   }
 };
+
+/**
+ * Generates a set of interview questions based on the job role and skills
+ * @async
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.jobTitle - Required: The job title for the interview
+ * @param {string} [req.body.department] - Department for the role
+ * @param {Array|string} [req.body.requiredSkills] - Skills used to tailor the questions
+ * @param {string} [req.body.experience] - Target experience level
+ * @param {string} [req.body.jobType] - Type of employment
+ * @param {number} [req.body.numberOfQuestions] - Requested number of questions
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with generated questions
+ */
+exports.generateInterviewQuestions = async (req, res) => {
+  try {
+    const {
+      jobTitle,
+      department,
+      requiredSkills = [],
+      experience,
+      jobType,
+      numberOfQuestions = 5,
+    } = req.body;
+
+    if (!jobTitle) {
+      return res.status(400).json({ message: "Job title is required." });
+    }
+
+    const skills = Array.isArray(requiredSkills)
+      ? requiredSkills.filter(Boolean)
+      : String(requiredSkills)
+          .split(",")
+          .map((skill) => skill.trim())
+          .filter(Boolean);
+
+    const prompt = `Generate ${numberOfQuestions} interview questions for a ${jobTitle} role in the ${department || "General"} department. Required skills: ${skills.length ? skills.join(", ") : "Not specified"}. Experience level: ${experience || "Not specified"}. Job type: ${jobType || "Full-time"}. Return the questions as a numbered list.`;
+
+    const response = await openai.chat.completions.create({
+      model: DEFAULT_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are an HR assistant that creates relevant, role-specific interview questions.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.6,
+    });
+
+    const questionsText = extractContent(response);
+    const questions = questionsText
+      .split("\n")
+      .map((line) => line.replace(/^\d+\.\s*/, "").trim())
+      .filter(Boolean);
+
+    res.status(200).json({ questions });
+  } catch (error) {
+    console.error("AI interview question error:", error);
+    res.status(500).json({ message: "Unable to generate interview questions.", error: error.message });
+  }
+};
+
+/**
+ * Creates an onboarding checklist for a new hire based on role and department
+ * @async
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.jobTitle - Required: The job title of the new hire
+ * @param {string} [req.body.department] - Department for the new hire
+ * @param {number} [req.body.onboardingLengthDays] - Duration of the onboarding checklist
+ * @param {string} [req.body.startDate] - Optional start date to personalize the checklist
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON response with generated checklist items
+ */
+exports.generateOnboardingChecklist = async (req, res) => {
+  try {
+    const {
+      jobTitle,
+      department,
+      onboardingLengthDays = 30,
+      startDate,
+    } = req.body;
+
+    if (!jobTitle) {
+      return res.status(400).json({ message: "Job title is required." });
+    }
+
+    const prompt = `Create a clear onboarding checklist for a new ${jobTitle} joining the ${department || "General"} department. Include tasks for the first day, first week, and first month within ${onboardingLengthDays} days.${startDate ? ` Start date: ${startDate}.` : ""} Return the checklist as a numbered or bulleted list.`;
+
+    const response = await openai.chat.completions.create({
+      model: DEFAULT_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are an HR assistant that writes practical onboarding checklists for new employees.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.6,
+    });
+
+    const checklistText = extractContent(response);
+    const checklist = checklistText
+      .split("\n")
+      .map((line) => line.replace(/^[-*\d\.\)\s]*/, "").trim())
+      .filter(Boolean);
+
+    res.status(200).json({ checklist });
+  } catch (error) {
+    console.error("AI onboarding checklist error:", error);
+    res.status(500).json({ message: "Unable to generate onboarding checklist.", error: error.message });
+  }
+};

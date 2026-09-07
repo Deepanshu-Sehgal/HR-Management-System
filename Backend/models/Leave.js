@@ -22,6 +22,11 @@ const LeaveSchema = new mongoose.Schema({
   status: {
     type: String,
   },
+  email: {
+    type: String,
+    trim: true,
+    lowercase: true,
+  },
   reviewComment: {
     type: String,
   },

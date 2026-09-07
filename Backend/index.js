@@ -15,7 +15,17 @@ const announcementRoutes = require("./routes/announcementRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const attendanceAnalyticsRoutes = require("./routes/attendanceAnalyticsRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const reimbursementRoutes = require("./routes/reimbursementRoutes");
+const policyRoutes = require("./routes/policyRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const pipelineRoutes = require("./routes/pipelineRoutes");
+const pipelineController = require("./controllers/pipelineController");
+const interviewRoutes = require("./routes/interviewRoutes");
+const onboardingRoutes = require("./routes/onboardingRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
+const offerRoutes = require("./routes/offerRoutes");
+const offerController = require("./controllers/offerController");
+const recruitmentAnalyticsRoutes = require("./routes/recruitmentAnalyticsRoutes");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -111,7 +121,15 @@ app.use("/api/job-openings", jobOpeningRoutes);
 app.use("/api/job-applications", jobApplicationRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/reimbursements", reimbursementRoutes);
+app.use("/api/policies", policyRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/pipelines", pipelineRoutes);
+app.use("/api/interviews", interviewRoutes);
+app.use("/api/onboarding", onboardingRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/offers", offerRoutes);
+app.use("/api/recruitment-analytics", recruitmentAnalyticsRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
@@ -143,3 +161,22 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
+
+// Recruitment pipeline automation: periodically sweep for SLA-breached
+// applications and auto-advance / flag them. Interval configurable via
+// PIPELINE_SWEEP_MINUTES (default 60). Set to 0 to disable.
+const sweepMinutes = process.env.PIPELINE_SWEEP_MINUTES
+  ? parseInt(process.env.PIPELINE_SWEEP_MINUTES, 10)
+  : 60;
+if (sweepMinutes > 0) {
+  setInterval(() => {
+    pipelineController.runSlaSweep().catch((err) =>
+      logger.error(`Scheduled SLA sweep failed: ${err.message}`)
+    );
+    // Expire stale sent offers in the same cadence.
+    offerController.runExpirySweep().catch((err) =>
+      logger.error(`Scheduled offer expiry sweep failed: ${err.message}`)
+    );
+  }, sweepMinutes * 60 * 1000);
+  logger.info(`Pipeline SLA + offer expiry sweep scheduled every ${sweepMinutes} minute(s)`);
+}

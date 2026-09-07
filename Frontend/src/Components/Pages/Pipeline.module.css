@@ -1,0 +1,966 @@
+.container {
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.headerRow h1 {
+  color: #1f2937;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
+  max-width: 640px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+}
+
+.sweepBtn {
+  background-color: #4f46e5;
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sweepBtn:hover {
+  background-color: #4338ca;
+}
+.sweepBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sweepResult {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+/* ---- Funnel / KPIs ---- */
+.funnelBar {
+  display: flex;
+  gap: 14px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 84px;
+  padding: 0 10px;
+  border-right: 1px solid #eee;
+}
+
+.kpiValue {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+}
+.kpiLabel {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.danger {
+  color: #dc2626 !important;
+}
+
+.funnelStages {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.funnelStage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 70px;
+}
+.funnelName {
+  font-size: 11px;
+  color: #6b7280;
+}
+.funnelCount {
+  font-size: 20px;
+  font-weight: 700;
+}
+.funnelConv {
+  font-size: 11px;
+  color: #16a34a;
+}
+
+/* ---- Task tracker ---- */
+.tasksBtn {
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tasksBtn:hover {
+  background: #0284c7;
+}
+.taskCountPill {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 0 7px;
+  font-size: 12px;
+}
+.taskTracker {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+.taskTrackerHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+.closeInline {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #6b7280;
+}
+.taskTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.taskTable th {
+  text-align: left;
+  padding: 8px 10px;
+  color: #6b7280;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #eee;
+}
+.taskRow {
+  cursor: pointer;
+}
+.taskRow td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #f1f1f1;
+  color: #1f2937;
+}
+.taskRow:hover {
+  background: #f9fafb;
+}
+.taskRowOverdue {
+  background: #fef2f2;
+}
+.taskJob {
+  color: #9ca3af;
+  font-size: 12px;
+}
+.tprio {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+.tp_Low {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.tp_Medium {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.tp_High {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.taskBadge {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+
+/* ---- Tasks in drawer ---- */
+.taskDrawerList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.drawerTask {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.drawerTask input[type="checkbox"] {
+  margin-top: 3px;
+}
+.drawerTaskOverdue {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+.drawerTaskBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  font-size: 14px;
+  color: #1f2937;
+}
+.taskDoneText {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+.drawerTaskMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #6b7280;
+}
+.taskDelBtn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 13px;
+}
+.taskDelBtn:hover {
+  color: #dc2626;
+}
+.taskForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 14px;
+}
+.taskForm > input {
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.taskFormRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.taskFormRow input,
+.taskFormRow select {
+  padding: 7px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  flex: 1;
+  min-width: 90px;
+}
+.taskFormRow button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+/* ---- Offers (drawer) ---- */
+.offerSendToggle {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  font-size: 13px !important;
+}
+.offerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.offerStatus {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.of_Draft {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.of_Sent {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.of_Accepted {
+  background: #dcfce7;
+  color: #15803d;
+}
+.of_Declined {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.of_Expired {
+  background: #fef3c7;
+  color: #b45309;
+}
+.of_Withdrawn {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.onboardHint {
+  font-size: 11px;
+  color: #15803d;
+  font-weight: 600;
+}
+
+/* ---- Upcoming interviews ---- */
+.upcomingBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.upcomingTitle {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.upcomingList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.upcomingChip {
+  display: flex;
+  flex-direction: column;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #0369a1;
+}
+.upcomingChip strong {
+  color: #0c4a6e;
+}
+.upcomingMode {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #0284c7;
+}
+
+/* ---- Toolbar ---- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.searchInput {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  min-width: 260px;
+  font-size: 14px;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+}
+.clearBtn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #374151;
+}
+.clearBtn:hover {
+  background: #e5e7eb;
+}
+.hint {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* ---- Kanban board ---- */
+.board {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  align-items: flex-start;
+}
+
+.column {
+  background: #eef0f4;
+  border-radius: 10px;
+  min-width: 260px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 320px);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.columnDragOver {
+  background: #dbeafe;
+  box-shadow: inset 0 0 0 2px #60a5fa;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-top: 4px solid #2563eb;
+  border-radius: 10px 10px 0 0;
+  background: #fff;
+}
+.columnName {
+  font-weight: 700;
+  color: #1f2937;
+  flex: 1;
+}
+.columnCount {
+  background: #e5e7eb;
+  color: #374151;
+  border-radius: 12px;
+  padding: 1px 9px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.overduePill {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 12px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.columnBody {
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emptyCol {
+  color: #9ca3af;
+  font-size: 13px;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  border-left: 3px solid transparent;
+  cursor: grab;
+}
+.card:active {
+  cursor: grabbing;
+}
+.cardOverdue {
+  border-left-color: #dc2626;
+}
+.cardDragging {
+  opacity: 0.5;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cardName {
+  color: #111827;
+  font-size: 14px;
+}
+.rating {
+  color: #f59e0b;
+  font-size: 12px;
+  font-weight: 600;
+}
+.cardJob {
+  color: #4b5563;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.cardMeta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: #6b7280;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.overdueNote {
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 3px 6px;
+  margin-top: 6px;
+}
+.tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.tag {
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 10px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.moveSelect {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+.detailBtn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #374151;
+}
+.detailBtn:hover {
+  background: #e5e7eb;
+}
+
+/* ---- Enroll panel ---- */
+.enrollPanel {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.enrollPanel h3 {
+  margin: 0 0 12px;
+  color: #1f2937;
+  font-size: 16px;
+}
+.enrollGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.enrollCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+}
+.enrollBtn {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.enrollBtn:hover {
+  background: #15803d;
+}
+
+/* ---- Detail drawer ---- */
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1000;
+}
+.drawer {
+  width: 420px;
+  max-width: 90vw;
+  background: #fff;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+}
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.drawerHeader h2 {
+  margin: 0;
+  color: #111827;
+}
+.drawerHeader p {
+  margin: 2px 0 0;
+  color: #6b7280;
+}
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #6b7280;
+}
+.drawerMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 14px 0;
+  font-size: 13px;
+  color: #4b5563;
+}
+.addNote {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0;
+}
+.addNote input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+.addNote button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+/* ---- Interviews (drawer) ---- */
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.sectionHead h4 {
+  margin: 8px 0;
+}
+.scheduleToggle {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.scheduleToggle:hover {
+  background: #1d4ed8;
+}
+.ivForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.ivForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #4b5563;
+  flex: 1;
+}
+.ivForm input,
+.ivForm select {
+  padding: 7px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.ivRow {
+  display: flex;
+  gap: 10px;
+}
+.ivSubmit {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ivSubmit:hover {
+  background: #15803d;
+}
+.ivList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ivItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #1f2937;
+}
+.ivMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.ivFeedback {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  color: #4b5563;
+}
+.ivStars {
+  color: #f59e0b;
+  letter-spacing: 1px;
+}
+.ivReview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 8px;
+}
+.ivReview select {
+  padding: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.starPick {
+  display: flex;
+  gap: 2px;
+  font-size: 18px;
+  cursor: pointer;
+}
+.starOn {
+  color: #f59e0b;
+}
+.starOff {
+  color: #d1d5db;
+}
+.ivFeedbackInput {
+  width: 100%;
+  min-height: 56px;
+  padding: 7px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.ivReviewActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.ivSaveBtn {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ivSaveBtn:hover {
+  background: #15803d;
+}
+.ivWhen {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+.ivRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ivStatus {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.iv_Scheduled {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.iv_Completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+.iv_Cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.iv_Noshow {
+  background: #fef3c7;
+  color: #b45309;
+}
+.ivCancel {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: #6b7280;
+}
+.ivCancel:hover {
+  background: #f3f4f6;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.timelineItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 4px;
+  background: #9ca3af;
+  flex-shrink: 0;
+}
+.dot_email {
+  background: #2563eb;
+}
+.dot_stage {
+  background: #8b5cf6;
+}
+.dot_system {
+  background: #f59e0b;
+}
+.dot_note {
+  background: #16a34a;
+}
+.timelineMsg {
+  font-size: 13px;
+  color: #1f2937;
+}
+.timelineMeta {
+  font-size: 11px;
+  color: #9ca3af;
+}
+.muted {
+  color: #9ca3af;
+  font-size: 13px;
+}

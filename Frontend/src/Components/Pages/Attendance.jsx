@@ -94,36 +94,37 @@ const Attendance = () => {
         </button>
       ),
       SquareDiv: (
-      <div
-        className={styles.squareDiv}
-        style={
-          employee.status === "Absent"
-            ? {
-                backgroundImage:
-                  "linear-gradient(180deg, #FF3D3D 0%, #992525 100%)",
-              }
-            : employee.status === "Present"
-            ? {
-                backgroundImage:
-                  "linear-gradient(180deg, #1C982E 0%, #0E4F17 100%)",
-              }
-            : employee.status === "Work from Home"
-            ? {
-                backgroundImage:
-                  "linear-gradient(180deg, #62C9CD 0%, #298487 100%)",
-              }
-            : employee.status === "Medical Leave"
-            ? {
-                backgroundImage:
-                  "linear-gradient(180deg, #DAC400 0%, #D0BB00 100%)",
-              }
-            : { backgroundColor: "white" }
-        }
-      />
-    ),
-    edit: <img src={Vertical} alt="Delete" style={{ cursor: "pointer" }} />,
-    // Assign Sno based on the index
-  }));
+        <div
+          className={styles.squareDiv}
+          style={
+            employee.status === "Absent"
+              ? {
+                  backgroundImage:
+                    "linear-gradient(180deg, #FF3D3D 0%, #992525 100%)",
+                }
+              : employee.status === "Present"
+              ? {
+                  backgroundImage:
+                    "linear-gradient(180deg, #1C982E 0%, #0E4F17 100%)",
+                }
+              : employee.status === "Work from Home"
+              ? {
+                  backgroundImage:
+                    "linear-gradient(180deg, #62C9CD 0%, #298487 100%)",
+                }
+              : employee.status === "Medical Leave"
+              ? {
+                  backgroundImage:
+                    "linear-gradient(180deg, #DAC400 0%, #D0BB00 100%)",
+                }
+              : { backgroundColor: "white" }
+          }
+        />
+      ),
+      edit: <img src={Vertical} alt="Delete" style={{ cursor: "pointer" }} />,
+      Sno: index + 1,
+    };
+  });
 
   const handlePositionChange = (e) => setSelectedPosition(e.target.value);
   const handleSearchChange = (e) => setSearchTerm(e.target.value);

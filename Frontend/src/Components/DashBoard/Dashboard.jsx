@@ -14,6 +14,7 @@ import {
   Notifications,
   Profile,
   Leftmenu,
+  Work,
 } from "../../assets";
 
 const Dashboard = () => {
@@ -22,10 +23,15 @@ const Dashboard = () => {
 
   const pageTitles = {
     "/dashboard/candidates": "Candidates",
+    "/dashboard/pipeline": "Recruitment Pipeline",
+    "/dashboard/recruitment-analytics": "Recruitment Analytics",
     "/dashboard/employees": "Employees",
     "/dashboard/attendance": "Attendance",
     "/dashboard/leaves": "Leaves",
+    "/dashboard/onboarding": "Employee Onboarding",
+    "/dashboard/helpdesk": "HR Helpdesk",
     "/dashboard/ai-assistant": "AI Assistant",
+    "/dashboard/hr-management": "HR Management",
   };
 
   const currentPage = pageTitles[location.pathname] || "Candidates";
@@ -81,6 +87,42 @@ const Dashboard = () => {
             />
             Candidates
           </Link>
+          <Link
+            to="/dashboard/pipeline"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/pipeline" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/pipeline" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={Signal}
+              alt="Pipeline"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/pipeline" ? dash.activeIcon : ""
+              }`}
+            />
+            Pipeline
+          </Link>
+          <Link
+            to="/dashboard/recruitment-analytics"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/recruitment-analytics" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/recruitment-analytics" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={Signal}
+              alt="Analytics"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/recruitment-analytics" ? dash.activeIcon : ""
+              }`}
+            />
+            Analytics
+          </Link>
         </div>
 
         <div className={dash.menuSection}>
@@ -128,6 +170,58 @@ const Dashboard = () => {
             )}
             <img src={Shine} alt="Leaves" className={dash.icon} />
             Leaves
+          </Link>
+          <Link
+            to="/dashboard/onboarding"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/onboarding" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/onboarding" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={UserAdd}
+              alt="Onboarding"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/onboarding" ? dash.activeIcon : ""
+              }`}
+            />
+            Onboarding
+          </Link>
+        </div>
+
+        <div className={dash.menuSection}>
+          <div className={dash.menuHeading}>HR</div>
+          <Link
+            to="/dashboard/hr-management"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/hr-management" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/hr-management" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img src={Work} alt="HR Management" className={dash.icon} />
+            HR Management
+          </Link>
+          <Link
+            to="/dashboard/helpdesk"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/helpdesk" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/helpdesk" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={Mail}
+              alt="Helpdesk"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/helpdesk" ? dash.activeIcon : ""
+              }`}
+            />
+            Helpdesk
           </Link>
         </div>
 

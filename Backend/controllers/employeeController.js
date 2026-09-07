@@ -9,17 +9,30 @@ const generateUniqueId = (prefix) => {
 };
 
 exports.getEmployees = async (req, res) => {
-  console.log(req.body);
-  const pos = req.body?.department;
-  let employees;
+  const { department, searchTerm, status } = req.body || {};
+  const query = {};
+
+  if (department) {
+    query.department = department;
+  }
+
+  if (status) {
+    query.status = status;
+  }
+
+  if (searchTerm) {
+    const searchRegex = new RegExp(searchTerm.trim(), "i");
+    query.$or = [
+      { employeeName: searchRegex },
+      { email: searchRegex },
+      { department: searchRegex },
+      { position: searchRegex },
+      { employeeId: searchRegex },
+    ];
+  }
 
   try {
-    if (!pos) {
-      employees = await Employees.find();
-    } else {
-      employees = await Employees.find({ department: pos });
-    }
-
+    const employees = await Employees.find(query);
     res.status(200).json(employees);
   } catch (error) {
     console.error("Error fetching employees:", error);

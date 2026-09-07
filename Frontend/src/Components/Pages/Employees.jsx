@@ -35,22 +35,72 @@ const Employees = () => {
   ];
   const fetchCandidates = async () => {
     try {
-      const body = {
-        department: selectedPosition,
-      };
-      console.log(" fetch data");
+      const body = {};
+      if (selectedPosition) {
+        body.department = selectedPosition;
+      }
+      if (searchTerm) {
+        body.searchTerm = searchTerm.trim();
+      }
+
       const response = await getUsers(body);
-      console.log(response.data, " fetch data");
-      setEmployeeData(response.data);
+      setEmployeeData(response.data || []);
     } catch (error) {
-      console.error("Error fetching candidates:", error);
+      console.error("Error fetching employees:", error);
     }
   };
 
   useEffect(() => {
-    fetchCandidates();
-    console.log(employeeData, "emp data");
-  }, [selectedPosition]);
+    const timer = setTimeout(() => {
+      fetchCandidates();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [selectedPosition, searchTerm]);
+
+  const exportEmployeesCsv = () => {
+    if (!employeeData.length) return;
+
+    const headers = [
+      "Employee Name",
+      "Email",
+      "Phone Number",
+      "Department",
+      "Position",
+      "Experience",
+      "Date of Joining",
+      "Status",
+    ];
+
+    const rows = employeeData.map((employee) => [
+      employee.employeeName,
+      employee.email,
+      employee.phoneNumber,
+      employee.department,
+      employee.position,
+      employee.experience,
+      employee.date,
+      employee.status,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\r\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "employees.csv");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const fields = [
     {
@@ -198,18 +248,46 @@ const Employees = () => {
               <img src={Search} alt="Search" className={styles.searchIcon} />
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search by name, email, department, or position"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className={styles.searchInput}
               />
             </div>
-            <button className={styles.addButton} onClick={() => setIsAddPopupOpen(true)}>
+            <button
+              className={styles.addButton}
+              onClick={() => setIsAddPopupOpen(true)}
+              style={{ marginRight: 12 }}
+            >
               Add Employee
+            </button>
+            <button
+              className={styles.addButton}
+              onClick={exportEmployeesCsv}
+              style={{ background: "#1C982E" }}
+            >
+              Export CSV
             </button>
           </div>
         </div>
 
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+        >
+          <div style={{ color: "#4b5563", fontSize: 14 }}>
+            Showing {employeeData.length} employee{employeeData.length === 1 ? "" : "s"}
+            {selectedPosition ? ` in ${selectedPosition}` : ""}
+            {searchTerm ? ` matching "${searchTerm}"` : ""}
+          </div>
+          <div style={{ color: "#6b7280", fontSize: 14 }}>
+            {isLoading ? "Refreshing..." : "Data is up to date"}
+          </div>
+        </div>
         {/* Reusable Table */}
         <ReusableTable
           navItems={[]}

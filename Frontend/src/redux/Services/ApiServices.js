@@ -54,6 +54,7 @@ export const JobOpeningApi = {
   deleteJobOpening: (id) => axios.delete(`${API_BASE_URL}/job-openings/${id}`),
   getJobOpeningById: (id) => axios.get(`${API_BASE_URL}/job-openings/${id}`),
   closeJobOpening: (id) => axios.patch(`${API_BASE_URL}/job-openings/${id}/close`),
+  matchJobOpening: (id) => axios.get(`${API_BASE_URL}/job-openings/${id}/match`),
 };
 
 export const JobApplicationApi = {
@@ -84,6 +85,8 @@ export const AnnouncementApi = {
 export const AiApi = {
   generateAnnouncement: (data) => axios.post(`${API_BASE_URL}/ai/announcement`, data),
   generateJobDescription: (data) => axios.post(`${API_BASE_URL}/ai/job-description`, data),
+  generateInterviewQuestions: (data) => axios.post(`${API_BASE_URL}/ai/interview-questions`, data),
+  generateOnboardingChecklist: (data) => axios.post(`${API_BASE_URL}/ai/onboarding-checklist`, data),
   summarizeText: (data) => axios.post(`${API_BASE_URL}/ai/document-summary`, data),
 };
 

@@ -2,6 +2,7 @@ const Candidate = require("../models/Candidate");
 const Employee = require("../models/Employee");
 const path = require("path");
 const fs = require("fs");
+const { sendEmail } = require("../utils/email");
 
 const generateUniqueId = (prefix) => {
   return `${prefix}-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -64,6 +65,19 @@ exports.createCandidate = async (req, res) => {
 
     await newCandidate.save();
     await newEmployee.save();
+
+    if (email) {
+      try {
+        await sendEmail({
+          to: email,
+          subject: "Candidate Application Received",
+          text: `Hi ${candidateName}, your application has been received and is under review.`,
+          html: `<p>Hello ${candidateName},</p><p>Your application has been received and is currently under review.</p><p>Department: ${department}</p><p>Experience: ${experience}</p>`,
+        });
+      } catch (emailError) {
+        console.error("Candidate email notification failed:", emailError);
+      }
+    }
 
     res.status(201).json({ message: "Candidate saved successfully", resumePath, imagePath });
   } catch (error) {
@@ -136,6 +150,19 @@ exports.updateCandidate = async (req, res) => {
       { status: updatedStatus },
       { new: true }
     );
+
+    if (updatedCandidate?.email) {
+      try {
+        await sendEmail({
+          to: updatedCandidate.email,
+          subject: "Application Status Updated",
+          text: `Your candidate status has changed to ${updatedStatus}.`,
+          html: `<p>Hello ${updatedCandidate.candidateName},</p><p>Your application status is now <strong>${updatedStatus}</strong>.</p>`,
+        });
+      } catch (emailError) {
+        console.error("Candidate status email notification failed:", emailError);
+      }
+    }
 
     console.log(updatedCandidate, "updated candidate");
     res.status(200).json({ message: "Candidate updated successfully" });

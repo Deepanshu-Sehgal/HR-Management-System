@@ -30,6 +30,26 @@ function AiAssistant() {
   const [summaryResult, setSummaryResult] = useState("");
   const [summaryLoading, setSummaryLoading] = useState(false);
 
+  const [interviewForm, setInterviewForm] = useState({
+    jobTitle: "",
+    department: "",
+    requiredSkills: "",
+    experience: "",
+    jobType: "Full-time",
+    numberOfQuestions: 5,
+  });
+  const [interviewQuestions, setInterviewQuestions] = useState([]);
+  const [interviewLoading, setInterviewLoading] = useState(false);
+
+  const [onboardingForm, setOnboardingForm] = useState({
+    jobTitle: "",
+    department: "",
+    startDate: "",
+    onboardingLengthDays: 30,
+  });
+  const [onboardingChecklist, setOnboardingChecklist] = useState([]);
+  const [onboardingLoading, setOnboardingLoading] = useState(false);
+
   const handleAnnouncementChange = (e) => {
     const { name, value } = e.target;
     setAnnouncementForm((prev) => ({ ...prev, [name]: value }));
@@ -74,6 +94,58 @@ function AiAssistant() {
       setJobDescription(error?.response?.data?.message || "Unable to generate job description.");
     } finally {
       setJobLoading(false);
+    }
+  };
+
+  const handleInterviewChange = (e) => {
+    const { name, value } = e.target;
+    setInterviewForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleInterviewSubmit = async (e) => {
+    e.preventDefault();
+    setInterviewLoading(true);
+    setInterviewQuestions([]);
+
+    try {
+      const payload = {
+        ...interviewForm,
+        requiredSkills: interviewForm.requiredSkills
+          .split(",")
+          .map((skill) => skill.trim())
+          .filter(Boolean),
+        numberOfQuestions: Number(interviewForm.numberOfQuestions) || 5,
+      };
+      const response = await AiApi.generateInterviewQuestions(payload);
+      setInterviewQuestions(response.data.questions || []);
+    } catch (error) {
+      setInterviewQuestions([error?.response?.data?.message || "Unable to generate interview questions."]);
+    } finally {
+      setInterviewLoading(false);
+    }
+  };
+
+  const handleOnboardingChange = (e) => {
+    const { name, value } = e.target;
+    setOnboardingForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleOnboardingSubmit = async (e) => {
+    e.preventDefault();
+    setOnboardingLoading(true);
+    setOnboardingChecklist([]);
+
+    try {
+      const payload = {
+        ...onboardingForm,
+        onboardingLengthDays: Number(onboardingForm.onboardingLengthDays) || 30,
+      };
+      const response = await AiApi.generateOnboardingChecklist(payload);
+      setOnboardingChecklist(response.data.checklist || []);
+    } catch (error) {
+      setOnboardingChecklist([error?.response?.data?.message || "Unable to generate onboarding checklist."]);
+    } finally {
+      setOnboardingLoading(false);
     }
   };
 
@@ -139,6 +211,57 @@ function AiAssistant() {
         {jobDescription && (
           <div className={styles.resultBox}>
             <p>{jobDescription}</p>
+          </div>
+        )}
+      </section>
+
+      <section className={styles.card}>
+        <h2>Interview Question Generator</h2>
+        <form onSubmit={handleInterviewSubmit} className={styles.form}>
+          <input name="jobTitle" value={interviewForm.jobTitle} onChange={handleInterviewChange} placeholder="Job Title" required />
+          <input name="department" value={interviewForm.department} onChange={handleInterviewChange} placeholder="Department" />
+          <input name="requiredSkills" value={interviewForm.requiredSkills} onChange={handleInterviewChange} placeholder="Required Skills (comma-separated)" />
+          <input name="experience" value={interviewForm.experience} onChange={handleInterviewChange} placeholder="Experience" />
+          <select name="jobType" value={interviewForm.jobType} onChange={handleInterviewChange}>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Contract">Contract</option>
+            <option value="Temporary">Temporary</option>
+          </select>
+          <input name="numberOfQuestions" type="number" min="1" value={interviewForm.numberOfQuestions} onChange={handleInterviewChange} placeholder="Number of Questions" />
+          <button type="submit" disabled={interviewLoading}>
+            {interviewLoading ? "Generating..." : "Generate Interview Questions"}
+          </button>
+        </form>
+        {interviewQuestions.length > 0 && (
+          <div className={styles.resultBox}>
+            <ol>
+              {interviewQuestions.map((question, index) => (
+                <li key={index}>{question}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </section>
+
+      <section className={styles.card}>
+        <h2>Onboarding Checklist Creator</h2>
+        <form onSubmit={handleOnboardingSubmit} className={styles.form}>
+          <input name="jobTitle" value={onboardingForm.jobTitle} onChange={handleOnboardingChange} placeholder="Job Title" required />
+          <input name="department" value={onboardingForm.department} onChange={handleOnboardingChange} placeholder="Department" />
+          <input name="startDate" value={onboardingForm.startDate} onChange={handleOnboardingChange} placeholder="Start Date (optional)" />
+          <input name="onboardingLengthDays" type="number" min="7" value={onboardingForm.onboardingLengthDays} onChange={handleOnboardingChange} placeholder="Checklist Length (days)" />
+          <button type="submit" disabled={onboardingLoading}>
+            {onboardingLoading ? "Creating..." : "Generate Onboarding Checklist"}
+          </button>
+        </form>
+        {onboardingChecklist.length > 0 && (
+          <div className={styles.resultBox}>
+            <ol>
+              {onboardingChecklist.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ol>
           </div>
         )}
       </section>

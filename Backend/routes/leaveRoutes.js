@@ -13,6 +13,7 @@ const {
   createLeave,
   updateLeave,
   filterbydate,
+  getLeaveSummary,
 } = require("../controllers/leaveController");
 const { leaveSchema, leaveUpdateSchema } = require("../validators/leaveValidators");
 
@@ -55,6 +56,14 @@ router.put(
   validate(leaveUpdateSchema),
   updateLeave
 );
+
+router.get(
+  "/employeeleave/summary",
+  authMiddleware,
+  authorize("admin", "hr"),
+  getLeaveSummary
+);
+
 router.post(
   "/employeeleavefilter",
   authMiddleware,

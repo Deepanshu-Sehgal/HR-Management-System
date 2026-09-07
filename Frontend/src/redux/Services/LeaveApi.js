@@ -1,8 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 export const LeaveApi = createApi({
   reducerPath: "LeaveApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:4000/api" }),
+  baseQuery: fetchBaseQuery({ baseUrl: API_BASE_URL }),
   tagTypes: ["LeaveApi"],
   endpoints: (builder) => {
     return {
@@ -24,6 +26,13 @@ export const LeaveApi = createApi({
             body: data,
           };
         },
+        providesTags: ["LeaveApi"],
+      }),
+      getLeaveSummary: builder.query({
+        query: () => ({
+          url: "/employeeleave/summary",
+          method: "GET",
+        }),
         providesTags: ["LeaveApi"],
       }),
       addUser: builder.mutation({
@@ -65,4 +74,5 @@ export const {
   useDeleteUserMutation,
   useUpdateUserMutation,
   useGetUsersbydateMutation,
+  useGetLeaveSummaryQuery,
 } = LeaveApi;
