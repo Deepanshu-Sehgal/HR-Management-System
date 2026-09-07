@@ -149,6 +149,38 @@ export const fetchTasks = createAsyncThunk(
   }
 );
 
+// ----- AI lead management -----
+export const aiScoreLead = createAsyncThunk(
+  "pipeline/aiScoreLead",
+  async (applicationId) => {
+    const response = await axios.post(
+      `${PIPELINES_URL}/applications/${applicationId}/ai-score`
+    );
+    return response.data.application;
+  }
+);
+
+export const aiPrioritizeLeads = createAsyncThunk(
+  "pipeline/aiPrioritize",
+  async ({ pipelineId, rescore } = {}) => {
+    const response = await axios.post(`${PIPELINES_URL}/${pipelineId}/ai-prioritize`, {
+      rescore: !!rescore,
+    });
+    return response.data;
+  }
+);
+
+export const aiDraftLeadEmail = createAsyncThunk(
+  "pipeline/aiDraftEmail",
+  async ({ applicationId, purpose }) => {
+    const response = await axios.post(
+      `${PIPELINES_URL}/applications/${applicationId}/ai-email`,
+      { purpose }
+    );
+    return response.data; // { subject, body }
+  }
+);
+
 const initialState = {
   pipelines: [],
   activePipeline: null,
@@ -272,6 +304,9 @@ const PipelineSlice = createSlice({
       })
       .addCase(fetchTasks.fulfilled, (state, action) => {
         state.tasks = action.payload;
+      })
+      .addCase(aiScoreLead.fulfilled, (state, action) => {
+        replaceApp(state, action.payload);
       });
   },
 });

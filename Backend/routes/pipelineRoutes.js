@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pipelineController = require("../controllers/pipelineController");
+const aiLeadController = require("../controllers/aiLeadController");
 
 // Pipeline CRUD
 router.post("/", pipelineController.createPipeline);
@@ -21,6 +22,11 @@ router.post("/applications/:id/activity", pipelineController.addActivity);
 router.post("/applications/:id/tasks", pipelineController.addTask);
 router.patch("/applications/:id/tasks/:taskId", pipelineController.updateTask);
 router.delete("/applications/:id/tasks/:taskId", pipelineController.deleteTask);
+
+// AI lead management
+router.post("/applications/:id/ai-score", aiLeadController.scoreLead);
+router.post("/applications/:id/ai-email", aiLeadController.draftLeadEmail);
+router.post("/:id/ai-prioritize", aiLeadController.prioritizeLeads);
 
 // Pipeline-scoped views
 router.get("/:id/board", pipelineController.getBoard);

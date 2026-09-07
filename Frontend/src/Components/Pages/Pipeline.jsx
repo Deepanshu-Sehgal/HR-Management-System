@@ -13,6 +13,9 @@ import {
   updateTask,
   deleteTask,
   fetchTasks,
+  aiScoreLead,
+  aiPrioritizeLeads,
+  aiDraftLeadEmail,
 } from "../../redux/Slices/PipelineSlice";
 import { fetchJobApplications } from "../../redux/Slices/JobApplicationSlice";
 import {
@@ -85,6 +88,10 @@ function Pipeline() {
   const [taskForm, setTaskForm] = useState(EMPTY_TASK);
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [offerForm, setOfferForm] = useState(EMPTY_OFFER);
+  const [aiScoring, setAiScoring] = useState(false);
+  const [aiPrioritizing, setAiPrioritizing] = useState(false);
+  const [emailDraft, setEmailDraft] = useState(null); // { subject, body } | null
+  const [emailBusy, setEmailBusy] = useState(false);
 
   const pipelineId = activePipeline?._id;
 
@@ -104,6 +111,7 @@ function Pipeline() {
       setIvForm(EMPTY_INTERVIEW);
       setShowOfferForm(false);
       setOfferForm(EMPTY_OFFER);
+      setEmailDraft(null);
     }
   }, [dispatch, selected?._id]);
 
@@ -241,6 +249,32 @@ function Pipeline() {
     await dispatch(deleteOffer({ id }));
   };
 
+  // ---- AI lead management ----
+  const handleAiScore = async () => {
+    if (!selected) return;
+    setAiScoring(true);
+    const res = await dispatch(aiScoreLead(selected._id));
+    if (res.payload && res.payload._id) setSelected(res.payload);
+    setAiScoring(false);
+  };
+
+  const handleAiPrioritize = async () => {
+    if (!pipelineId) return;
+    setAiPrioritizing(true);
+    await dispatch(aiPrioritizeLeads({ pipelineId }));
+    refresh();
+    setAiPrioritizing(false);
+  };
+
+  const handleAiEmail = async () => {
+    if (!selected) return;
+    setEmailBusy(true);
+    setEmailDraft(null);
+    const res = await dispatch(aiDraftLeadEmail({ applicationId: selected._id }));
+    if (res.payload) setEmailDraft(res.payload);
+    setEmailBusy(false);
+  };
+
   const handleScheduleInterview = async (e) => {
     e.preventDefault();
     if (!selected || !ivForm.scheduledAt) return;
@@ -342,6 +376,14 @@ function Pipeline() {
           </p>
         </div>
         <div className={styles.headerActions}>
+          <button
+            className={styles.aiBtn}
+            onClick={handleAiPrioritize}
+            disabled={aiPrioritizing}
+            title="Score all un-scored active leads with AI"
+          >
+            {aiPrioritizing ? "Scoring…" : "✨ AI Prioritize"}
+          </button>
           <button
             className={styles.tasksBtn}
             onClick={() => setShowTasks((s) => !s)}
@@ -538,9 +580,19 @@ function Pipeline() {
                   >
                     <div className={styles.cardTop}>
                       <strong className={styles.cardName}>{app.applicantName}</strong>
-                      {app.rating > 0 && (
-                        <span className={styles.rating}>★ {app.rating}</span>
-                      )}
+                      <span className={styles.cardTopRight}>
+                        {typeof app.aiScore === "number" && (
+                          <span
+                            className={`${styles.aiScore} ${styles["aiFit_" + (app.aiFit || "")]}`}
+                            title={`AI fit: ${app.aiFit || "n/a"}`}
+                          >
+                            ✨ {app.aiScore}
+                          </span>
+                        )}
+                        {app.rating > 0 && (
+                          <span className={styles.rating}>★ {app.rating}</span>
+                        )}
+                      </span>
                     </div>
                     <div className={styles.cardJob}>{app.jobTitle}</div>
                     <div className={styles.cardMeta}>
@@ -645,6 +697,95 @@ function Pipeline() {
                 </span>
               )}
             </div>
+
+            {/* AI Insights */}
+            <div className={styles.sectionHead}>
+              <h4>✨ AI Insights</h4>
+              <button
+                className={styles.aiSmallBtn}
+                onClick={handleAiScore}
+                disabled={aiScoring}
+              >
+                {aiScoring
+                  ? "Analyzing…"
+                  : typeof selected.aiScore === "number"
+                  ? "Re-score"
+                  : "Score with AI"}
+              </button>
+            </div>
+
+            {typeof selected.aiScore === "number" ? (
+              <div className={styles.aiPanel}>
+                <div className={styles.aiScoreRow}>
+                  <span
+                    className={`${styles.aiScoreBig} ${styles["aiFit_" + (selected.aiFit || "")]}`}
+                  >
+                    {selected.aiScore}
+                  </span>
+                  <div>
+                    <div className={styles.aiFitLabel}>{selected.aiFit || "—"} fit</div>
+                    {selected.aiInsights?.summary && (
+                      <div className={styles.aiSummary}>{selected.aiInsights.summary}</div>
+                    )}
+                  </div>
+                </div>
+                {selected.aiInsights?.strengths?.length > 0 && (
+                  <div className={styles.aiBlock}>
+                    <span className={styles.aiBlockTitle}>Strengths</span>
+                    <ul>
+                      {selected.aiInsights.strengths.map((s, i) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {selected.aiInsights?.concerns?.length > 0 && (
+                  <div className={styles.aiBlock}>
+                    <span className={styles.aiBlockTitle}>Concerns</span>
+                    <ul>
+                      {selected.aiInsights.concerns.map((c, i) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {selected.aiInsights?.recommendedAction && (
+                  <div className={styles.aiAction}>
+                    <strong>Next step:</strong> {selected.aiInsights.recommendedAction}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className={styles.muted}>
+                Not scored yet. Run AI to assess this lead's fit.
+              </p>
+            )}
+
+            <div className={styles.aiEmailRow}>
+              <button
+                className={styles.aiSmallBtn}
+                onClick={handleAiEmail}
+                disabled={emailBusy}
+              >
+                {emailBusy ? "Drafting…" : "✍ Draft outreach email (AI)"}
+              </button>
+            </div>
+            {emailDraft && (
+              <div className={styles.aiEmailDraft}>
+                <div className={styles.aiEmailSubject}>
+                  <strong>Subject:</strong> {emailDraft.subject}
+                </div>
+                <textarea
+                  className={styles.aiEmailBody}
+                  readOnly
+                  value={emailDraft.body}
+                  rows={6}
+                />
+                <span className={styles.muted}>
+                  Copy into your email client to send.
+                </span>
+              </div>
+            )}
 
             {/* Tasks */}
             <h4>Tasks</h4>
