@@ -78,6 +78,7 @@ function Pipeline() {
   const [sweeping, setSweeping] = useState(false);
   const [search, setSearch] = useState("");
   const [overdueOnly, setOverdueOnly] = useState(false);
+  const [fitFilter, setFitFilter] = useState(""); // "", Strong, Moderate, Weak
   const [dragId, setDragId] = useState(null);
   const [dragOverCol, setDragOverCol] = useState(null);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -326,6 +327,7 @@ function Pipeline() {
   const filterApps = (apps) =>
     apps.filter((a) => {
       if (overdueOnly && !isOverdue(a.dueAt)) return false;
+      if (fitFilter && a.aiFit !== fitFilter) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
         return (
@@ -335,6 +337,58 @@ function Pipeline() {
       }
       return true;
     });
+
+  // Export the currently-visible (filtered) leads across all columns to CSV.
+  const exportCsv = () => {
+    const cols = [
+      "Name",
+      "Job Title",
+      "Stage",
+      "Assigned To",
+      "AI Score",
+      "AI Fit",
+      "Rating",
+      "Days In Stage",
+      "Open Tasks",
+      "SLA Due",
+      "Email",
+      "Phone",
+    ];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = [];
+    columns.forEach((col) => {
+      filterApps(col.applications).forEach((a) => {
+        rows.push([
+          a.applicantName,
+          a.jobTitle,
+          col.name,
+          a.assignedTo || "",
+          typeof a.aiScore === "number" ? a.aiScore : "",
+          a.aiFit || "",
+          a.rating || "",
+          a.stageEnteredAt != null ? daysInStage(a.stageEnteredAt) : "",
+          openTaskCount(a),
+          a.dueAt ? new Date(a.dueAt).toLocaleDateString() : "",
+          a.email || "",
+          a.phoneNumber || "",
+        ]);
+      });
+    });
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const name = (activePipeline?.name || "pipeline").replace(/\s+/g, "-").toLowerCase();
+    link.download = `${name}-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // ---- Native drag & drop between columns ----
   const findApp = (id) => {
@@ -524,17 +578,32 @@ function Pipeline() {
           />
           Overdue only
         </label>
-        {(search || overdueOnly) && (
+        <select
+          className={styles.fitSelect}
+          value={fitFilter}
+          onChange={(e) => setFitFilter(e.target.value)}
+          title="Filter by AI fit"
+        >
+          <option value="">All AI fits</option>
+          <option value="Strong">✨ Strong fit</option>
+          <option value="Moderate">✨ Moderate fit</option>
+          <option value="Weak">✨ Weak fit</option>
+        </select>
+        {(search || overdueOnly || fitFilter) && (
           <button
             className={styles.clearBtn}
             onClick={() => {
               setSearch("");
               setOverdueOnly(false);
+              setFitFilter("");
             }}
           >
             Clear
           </button>
         )}
+        <button className={styles.exportBtn} onClick={exportCsv}>
+          ⬇ Export CSV
+        </button>
         <span className={styles.hint}>Tip: drag a card to another column to move it.</span>
       </div>
 
