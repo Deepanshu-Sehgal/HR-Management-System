@@ -83,6 +83,17 @@ export const addActivity = createAsyncThunk(
   }
 );
 
+export const updateApplicationMeta = createAsyncThunk(
+  "pipeline/updateApplicationMeta",
+  async ({ applicationId, assignedTo, tags }) => {
+    const response = await axios.patch(
+      `${PIPELINES_URL}/applications/${applicationId}/meta`,
+      { assignedTo, tags }
+    );
+    return response.data.application;
+  }
+);
+
 export const createPipeline = createAsyncThunk(
   "pipeline/createPipeline",
   async (data) => {
@@ -306,6 +317,9 @@ const PipelineSlice = createSlice({
         state.tasks = action.payload;
       })
       .addCase(aiScoreLead.fulfilled, (state, action) => {
+        replaceApp(state, action.payload);
+      })
+      .addCase(updateApplicationMeta.fulfilled, (state, action) => {
         replaceApp(state, action.payload);
       });
   },

@@ -123,6 +123,69 @@
   color: #16a34a;
 }
 
+/* ---- Owner + tags editor (drawer) ---- */
+.metaEditRow {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.metaField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: #6b7280;
+  flex: 1;
+  min-width: 160px;
+}
+.metaField > input {
+  padding: 7px 9px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.tagEditor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 5px 7px;
+  min-height: 34px;
+}
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+.tagChip button {
+  background: none;
+  border: none;
+  color: #6366f1;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+.tagChip button:hover {
+  color: #b91c1c;
+}
+.tagInput {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  flex: 1;
+  min-width: 60px;
+  padding: 2px;
+}
+
 /* ---- AI lead management ---- */
 .aiBtn {
   background: linear-gradient(90deg, #7c3aed, #4f46e5);

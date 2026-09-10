@@ -300,6 +300,26 @@ exports.moveStage = async (req, res) => {
   }
 };
 
+// Update lightweight lead metadata: recruiter owner and tags.
+exports.updateApplicationMeta = async (req, res) => {
+  try {
+    const { assignedTo, tags } = req.body;
+    const app = await JobApplication.findById(req.params.id);
+    if (!app) return res.status(404).json({ message: "Application not found" });
+
+    if (assignedTo !== undefined) app.assignedTo = assignedTo;
+    if (Array.isArray(tags)) {
+      app.tags = [
+        ...new Set(tags.map((t) => String(t).trim()).filter(Boolean)),
+      ].slice(0, 20);
+    }
+    await app.save();
+    res.status(200).json({ message: "Application updated", application: app });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Append a manual note/comment to an application's activity timeline.
 exports.addActivity = async (req, res) => {
   try {

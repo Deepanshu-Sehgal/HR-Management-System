@@ -8,6 +8,7 @@ import {
   moveStage,
   enrollApplication,
   addActivity,
+  updateApplicationMeta,
   runSlaSweep,
   addTask,
   updateTask,
@@ -81,6 +82,7 @@ function Pipeline() {
   const [fitFilter, setFitFilter] = useState(""); // "", Strong, Moderate, Weak
   const [sortBy, setSortBy] = useState(""); // "", ai, sla, stage, rating
   const [emailCopied, setEmailCopied] = useState(false);
+  const [tagInput, setTagInput] = useState("");
   const [dragId, setDragId] = useState(null);
   const [dragOverCol, setDragOverCol] = useState(null);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -115,8 +117,19 @@ function Pipeline() {
       setShowOfferForm(false);
       setOfferForm(EMPTY_OFFER);
       setEmailDraft(null);
+      setTagInput("");
     }
   }, [dispatch, selected?._id]);
+
+  // Close the candidate drawer on Escape.
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected]);
 
   useEffect(() => {
     if (pipelineId) {
@@ -167,6 +180,35 @@ function Pipeline() {
     );
     if (res.payload) setSelected(res.payload);
     setNote("");
+  };
+
+  // Assign / reassign the recruiter owner (saved on blur).
+  const handleAssign = async (value) => {
+    if (!selected || value === (selected.assignedTo || "")) return;
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, assignedTo: value })
+    );
+    if (res.payload) setSelected(res.payload);
+  };
+
+  const handleAddTag = async () => {
+    const tag = tagInput.trim();
+    if (!tag || !selected) return;
+    const next = [...new Set([...(selected.tags || []), tag])];
+    setTagInput("");
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, tags: next })
+    );
+    if (res.payload) setSelected(res.payload);
+  };
+
+  const handleRemoveTag = async (tag) => {
+    if (!selected) return;
+    const next = (selected.tags || []).filter((t) => t !== tag);
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, tags: next })
+    );
+    if (res.payload) setSelected(res.payload);
   };
 
   const handleSweep = async () => {
@@ -816,6 +858,51 @@ function Pipeline() {
                   SLA due: {new Date(selected.dueAt).toLocaleDateString()}
                 </span>
               )}
+            </div>
+
+            {/* Owner + tags */}
+            <div className={styles.metaEditRow}>
+              <label className={styles.metaField}>
+                Owner
+                <input
+                  type="text"
+                  placeholder="Assign recruiter"
+                  defaultValue={selected.assignedTo || ""}
+                  key={selected._id + (selected.assignedTo || "")}
+                  onBlur={(e) => handleAssign(e.target.value.trim())}
+                />
+              </label>
+              <div className={styles.metaField}>
+                Tags
+                <div className={styles.tagEditor}>
+                  {(selected.tags || []).map((t) => (
+                    <span key={t} className={styles.tagChip}>
+                      {t}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(t)}
+                        title="Remove tag"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    className={styles.tagInput}
+                    placeholder="+ tag"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddTag();
+                      }
+                    }}
+                    onBlur={handleAddTag}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* AI Insights */}

@@ -16,6 +16,7 @@ router.post("/run-sla-sweep", pipelineController.triggerSlaSweep);
 // Application movement within a pipeline
 router.post("/enroll", pipelineController.enrollApplication);
 router.patch("/applications/:id/move", pipelineController.moveStage);
+router.patch("/applications/:id/meta", pipelineController.updateApplicationMeta);
 router.post("/applications/:id/activity", pipelineController.addActivity);
 
 // Per-application task tracking
