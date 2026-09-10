@@ -79,6 +79,8 @@ function Pipeline() {
   const [search, setSearch] = useState("");
   const [overdueOnly, setOverdueOnly] = useState(false);
   const [fitFilter, setFitFilter] = useState(""); // "", Strong, Moderate, Weak
+  const [sortBy, setSortBy] = useState(""); // "", ai, sla, stage, rating
+  const [emailCopied, setEmailCopied] = useState(false);
   const [dragId, setDragId] = useState(null);
   const [dragOverCol, setDragOverCol] = useState(null);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -273,7 +275,20 @@ function Pipeline() {
     setEmailDraft(null);
     const res = await dispatch(aiDraftLeadEmail({ applicationId: selected._id }));
     if (res.payload) setEmailDraft(res.payload);
+    setEmailCopied(false);
     setEmailBusy(false);
+  };
+
+  const handleCopyEmail = async () => {
+    if (!emailDraft) return;
+    const text = `Subject: ${emailDraft.subject}\n\n${emailDraft.body}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (e.g. insecure context) — no-op.
+    }
   };
 
   const handleScheduleInterview = async (e) => {
@@ -337,6 +352,29 @@ function Pipeline() {
       }
       return true;
     });
+
+  // Sort a column's cards by the selected key (default keeps backend order).
+  const sortApps = (apps) => {
+    if (!sortBy) return apps;
+    const arr = [...apps];
+    const num = (v) => (typeof v === "number" ? v : -Infinity);
+    const time = (v) => (v ? new Date(v).getTime() : Infinity);
+    arr.sort((a, b) => {
+      switch (sortBy) {
+        case "ai":
+          return num(b.aiScore) - num(a.aiScore); // highest fit first
+        case "sla":
+          return time(a.dueAt) - time(b.dueAt); // soonest due first
+        case "stage":
+          return time(a.stageEnteredAt) - time(b.stageEnteredAt); // longest in stage first
+        case "rating":
+          return (b.rating || 0) - (a.rating || 0);
+        default:
+          return 0;
+      }
+    });
+    return arr;
+  };
 
   // Export the currently-visible (filtered) leads across all columns to CSV.
   const exportCsv = () => {
@@ -589,13 +627,26 @@ function Pipeline() {
           <option value="Moderate">✨ Moderate fit</option>
           <option value="Weak">✨ Weak fit</option>
         </select>
-        {(search || overdueOnly || fitFilter) && (
+        <select
+          className={styles.fitSelect}
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          title="Sort cards within each stage"
+        >
+          <option value="">Sort: Newest</option>
+          <option value="ai">Sort: AI score</option>
+          <option value="sla">Sort: SLA due</option>
+          <option value="stage">Sort: Time in stage</option>
+          <option value="rating">Sort: Rating</option>
+        </select>
+        {(search || overdueOnly || fitFilter || sortBy) && (
           <button
             className={styles.clearBtn}
             onClick={() => {
               setSearch("");
               setOverdueOnly(false);
               setFitFilter("");
+              setSortBy("");
             }}
           >
             Clear
@@ -613,7 +664,7 @@ function Pipeline() {
       ) : (
         <div className={styles.board}>
           {columns.map((col) => {
-            const visible = filterApps(col.applications);
+            const visible = sortApps(filterApps(col.applications));
             return (
             <div
               key={col.key}
@@ -850,9 +901,12 @@ function Pipeline() {
                   value={emailDraft.body}
                   rows={6}
                 />
-                <span className={styles.muted}>
-                  Copy into your email client to send.
-                </span>
+                <div className={styles.aiEmailFoot}>
+                  <button className={styles.aiSmallBtn} onClick={handleCopyEmail}>
+                    {emailCopied ? "✓ Copied" : "📋 Copy"}
+                  </button>
+                  <span className={styles.muted}>Paste into your email client to send.</span>
+                </div>
               </div>
             )}
 
