@@ -221,6 +221,22 @@ exports.enrollApplication = async (req, res) => {
     const app = await JobApplication.findById(applicationId);
     if (!app) return res.status(404).json({ message: "Application not found" });
 
+    // Duplicate-lead guard: block enrolling the same candidate (by email) into
+    // the same pipeline more than once, unless the caller explicitly overrides.
+    if (app.email && !req.body.force) {
+      const duplicate = await JobApplication.findOne({
+        _id: { $ne: app._id },
+        pipelineId: pipeline._id,
+        email: app.email,
+      }).select("_id applicantName stageKey jobTitle");
+      if (duplicate) {
+        return res.status(409).json({
+          message: `A lead with email ${app.email} is already in this pipeline.`,
+          duplicate,
+        });
+      }
+    }
+
     const sortedStages = [...pipeline.stages].sort((a, b) => a.order - b.order);
     const stage = stageKey
       ? sortedStages.find((s) => s.key === stageKey)
@@ -295,6 +311,26 @@ exports.moveStage = async (req, res) => {
       automation: automationNotes,
       application: app,
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update lightweight lead metadata: recruiter owner and tags.
+exports.updateApplicationMeta = async (req, res) => {
+  try {
+    const { assignedTo, tags } = req.body;
+    const app = await JobApplication.findById(req.params.id);
+    if (!app) return res.status(404).json({ message: "Application not found" });
+
+    if (assignedTo !== undefined) app.assignedTo = assignedTo;
+    if (Array.isArray(tags)) {
+      app.tags = [
+        ...new Set(tags.map((t) => String(t).trim()).filter(Boolean)),
+      ].slice(0, 20);
+    }
+    await app.save();
+    res.status(200).json({ message: "Application updated", application: app });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
