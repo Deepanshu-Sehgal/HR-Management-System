@@ -221,6 +221,22 @@ exports.enrollApplication = async (req, res) => {
     const app = await JobApplication.findById(applicationId);
     if (!app) return res.status(404).json({ message: "Application not found" });
 
+    // Duplicate-lead guard: block enrolling the same candidate (by email) into
+    // the same pipeline more than once, unless the caller explicitly overrides.
+    if (app.email && !req.body.force) {
+      const duplicate = await JobApplication.findOne({
+        _id: { $ne: app._id },
+        pipelineId: pipeline._id,
+        email: app.email,
+      }).select("_id applicantName stageKey jobTitle");
+      if (duplicate) {
+        return res.status(409).json({
+          message: `A lead with email ${app.email} is already in this pipeline.`,
+          duplicate,
+        });
+      }
+    }
+
     const sortedStages = [...pipeline.stages].sort((a, b) => a.order - b.order);
     const stage = stageKey
       ? sortedStages.find((s) => s.key === stageKey)

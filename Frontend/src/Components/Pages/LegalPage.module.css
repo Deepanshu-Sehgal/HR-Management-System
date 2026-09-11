@@ -1,0 +1,29 @@
+.legalPage {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  color: #1f2937;
+}
+
+.legalPage h1 {
+  font-size: 32px;
+  margin: 0 0 24px;
+  color: #111827;
+}
+
+.content {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+.notice {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}

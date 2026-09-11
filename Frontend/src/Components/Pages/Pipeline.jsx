@@ -165,10 +165,19 @@ function Pipeline() {
     dispatch(fetchOverdue(pipelineId));
   };
 
-  const handleEnroll = async (application) => {
-    await dispatch(
-      enrollApplication({ applicationId: application._id, pipelineId, by: "HR" })
+  const handleEnroll = async (application, force = false) => {
+    const res = await dispatch(
+      enrollApplication({ applicationId: application._id, pipelineId, by: "HR", force })
     );
+    // Duplicate lead detected — offer to add anyway.
+    if (enrollApplication.rejected.match(res) && res.payload?.duplicate) {
+      const dup = res.payload.duplicate;
+      const ok = window.confirm(
+        `${res.payload.message}\n\nExisting: ${dup.applicantName} (${dup.jobTitle || "—"}).\nAdd this candidate anyway?`
+      );
+      if (ok) return handleEnroll(application, true);
+      return;
+    }
     dispatch(fetchJobApplications());
     refresh();
   };

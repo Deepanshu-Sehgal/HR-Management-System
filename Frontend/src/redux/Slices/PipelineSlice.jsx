@@ -50,14 +50,21 @@ export const fetchOverdue = createAsyncThunk(
 
 export const enrollApplication = createAsyncThunk(
   "pipeline/enroll",
-  async ({ applicationId, pipelineId, stageKey, by }) => {
-    const response = await axios.post(`${PIPELINES_URL}/enroll`, {
-      applicationId,
-      pipelineId,
-      stageKey,
-      by,
-    });
-    return response.data.application;
+  async ({ applicationId, pipelineId, stageKey, by, force }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${PIPELINES_URL}/enroll`, {
+        applicationId,
+        pipelineId,
+        stageKey,
+        by,
+        force,
+      });
+      return response.data.application;
+    } catch (err) {
+      // Surface the duplicate-lead 409 so the UI can offer to override.
+      if (err.response?.status === 409) return rejectWithValue(err.response.data);
+      throw err;
+    }
   }
 );
 
