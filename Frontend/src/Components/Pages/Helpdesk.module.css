@@ -138,6 +138,14 @@
   font-size: 13px;
   background: #fff;
 }
+.searchInput {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  min-width: 260px;
+  flex: 1;
+}
 
 /* Table */
 .tableWrap {

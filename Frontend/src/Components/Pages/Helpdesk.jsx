@@ -34,8 +34,20 @@ function Helpdesk() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [filter, setFilter] = useState({ status: "", priority: "", category: "" });
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [comment, setComment] = useState("");
+
+  // Client-side text search over already-fetched tickets.
+  const visibleTickets = items.filter((t) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (t.subject || "").toLowerCase().includes(q) ||
+      (t.ticketId || "").toLowerCase().includes(q) ||
+      (t.raisedByName || "").toLowerCase().includes(q)
+    );
+  });
 
   useEffect(() => {
     dispatch(fetchTickets(filter));
@@ -172,6 +184,13 @@ function Helpdesk() {
 
       {/* Filters */}
       <div className={styles.filters}>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="🔍 Search ID, subject, or requester..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <select
           value={filter.status}
           onChange={(e) => setFilter({ ...filter, status: e.target.value })}
@@ -204,7 +223,7 @@ function Helpdesk() {
       {/* Ticket table */}
       {loading ? (
         <p>Loading...</p>
-      ) : items.length === 0 ? (
+      ) : visibleTickets.length === 0 ? (
         <p className={styles.muted}>No tickets match.</p>
       ) : (
         <div className={styles.tableWrap}>
@@ -221,7 +240,7 @@ function Helpdesk() {
               </tr>
             </thead>
             <tbody>
-              {items.map((t) => (
+              {visibleTickets.map((t) => (
                 <tr key={t._id} onClick={() => setSelected(t)} className={styles.row}>
                   <td className={styles.mono}>{t.ticketId}</td>
                   <td>{t.subject}</td>
