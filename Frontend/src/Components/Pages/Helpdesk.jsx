@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchTickets,
@@ -38,16 +38,18 @@ function Helpdesk() {
   const [selected, setSelected] = useState(null);
   const [comment, setComment] = useState("");
 
-  // Client-side text search over already-fetched tickets.
-  const visibleTickets = items.filter((t) => {
+  // Client-side text search over already-fetched tickets (memoized so it only
+  // recomputes when the ticket list or query changes).
+  const visibleTickets = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      (t.subject || "").toLowerCase().includes(q) ||
-      (t.ticketId || "").toLowerCase().includes(q) ||
-      (t.raisedByName || "").toLowerCase().includes(q)
+    if (!q) return items;
+    return items.filter(
+      (t) =>
+        (t.subject || "").toLowerCase().includes(q) ||
+        (t.ticketId || "").toLowerCase().includes(q) ||
+        (t.raisedByName || "").toLowerCase().includes(q)
     );
-  });
+  }, [items, search]);
 
   useEffect(() => {
     dispatch(fetchTickets(filter));

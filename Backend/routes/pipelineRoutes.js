@@ -40,6 +40,7 @@ router.get("/ensure-default", pipelineController.ensureDefaultPipeline);
 // Automation & analytics that must resolve before the ":id" param routes
 router.get("/overdue", pipelineController.getOverdue);
 router.get("/tasks", pipelineController.getTasks);
+router.get("/workload", pipelineController.getRecruiterWorkload);
 router.post("/run-sla-sweep", pipelineController.triggerSlaSweep);
 
 // Application movement within a pipeline

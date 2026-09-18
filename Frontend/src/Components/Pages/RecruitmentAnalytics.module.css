@@ -214,3 +214,31 @@
   font-weight: 600;
   color: #1f2937;
 }
+
+/* Recruiter workload table */
+.tableWrap {
+  overflow-x: auto;
+}
+.wlTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.wlTable th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #6b7280;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+.wlTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f1f1;
+  color: #1f2937;
+}
+.wlTable tbody tr:hover {
+  background: #f9fafb;
+}
