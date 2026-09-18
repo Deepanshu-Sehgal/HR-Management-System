@@ -1,0 +1,64 @@
+.landingPage {
+  min-height: 100vh;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.heroSection {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.heroSection h1 {
+  font-size: 40px;
+  margin: 0 0 16px;
+  font-weight: 700;
+}
+
+.content {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 18px;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.linksSection {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.linksSection h2 {
+  font-size: 24px;
+  margin: 0 0 28px;
+  color: #111827;
+}
+
+.linkCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: block;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 28px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #4f46e5;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.15);
+}

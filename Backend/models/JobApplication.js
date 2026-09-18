@@ -119,6 +119,16 @@ const JobApplicationSchema = new mongoose.Schema({
       _id: false,
     },
   ],
+  // ----- AI lead intelligence (populated by the AI scoring endpoint) -----
+  aiScore: { type: Number, default: null, min: 0, max: 100 },
+  aiFit: { type: String, default: "" }, // Strong | Moderate | Weak
+  aiInsights: {
+    strengths: { type: [String], default: undefined },
+    concerns: { type: [String], default: undefined },
+    recommendedAction: { type: String },
+    summary: { type: String },
+    scoredAt: { type: Date },
+  },
   // Actionable to-do items HR must complete for this candidate.
   tasks: [
     {

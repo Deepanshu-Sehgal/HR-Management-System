@@ -8,11 +8,15 @@ import {
   moveStage,
   enrollApplication,
   addActivity,
+  updateApplicationMeta,
   runSlaSweep,
   addTask,
   updateTask,
   deleteTask,
   fetchTasks,
+  aiScoreLead,
+  aiPrioritizeLeads,
+  aiDraftLeadEmail,
 } from "../../redux/Slices/PipelineSlice";
 import { fetchJobApplications } from "../../redux/Slices/JobApplicationSlice";
 import {
@@ -75,6 +79,10 @@ function Pipeline() {
   const [sweeping, setSweeping] = useState(false);
   const [search, setSearch] = useState("");
   const [overdueOnly, setOverdueOnly] = useState(false);
+  const [fitFilter, setFitFilter] = useState(""); // "", Strong, Moderate, Weak
+  const [sortBy, setSortBy] = useState(""); // "", ai, sla, stage, rating
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [tagInput, setTagInput] = useState("");
   const [dragId, setDragId] = useState(null);
   const [dragOverCol, setDragOverCol] = useState(null);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -85,6 +93,10 @@ function Pipeline() {
   const [taskForm, setTaskForm] = useState(EMPTY_TASK);
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [offerForm, setOfferForm] = useState(EMPTY_OFFER);
+  const [aiScoring, setAiScoring] = useState(false);
+  const [aiPrioritizing, setAiPrioritizing] = useState(false);
+  const [emailDraft, setEmailDraft] = useState(null); // { subject, body } | null
+  const [emailBusy, setEmailBusy] = useState(false);
 
   const pipelineId = activePipeline?._id;
 
@@ -104,8 +116,20 @@ function Pipeline() {
       setIvForm(EMPTY_INTERVIEW);
       setShowOfferForm(false);
       setOfferForm(EMPTY_OFFER);
+      setEmailDraft(null);
+      setTagInput("");
     }
   }, [dispatch, selected?._id]);
+
+  // Close the candidate drawer on Escape.
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected]);
 
   useEffect(() => {
     if (pipelineId) {
@@ -141,10 +165,19 @@ function Pipeline() {
     dispatch(fetchOverdue(pipelineId));
   };
 
-  const handleEnroll = async (application) => {
-    await dispatch(
-      enrollApplication({ applicationId: application._id, pipelineId, by: "HR" })
+  const handleEnroll = async (application, force = false) => {
+    const res = await dispatch(
+      enrollApplication({ applicationId: application._id, pipelineId, by: "HR", force })
     );
+    // Duplicate lead detected — offer to add anyway.
+    if (enrollApplication.rejected.match(res) && res.payload?.duplicate) {
+      const dup = res.payload.duplicate;
+      const ok = window.confirm(
+        `${res.payload.message}\n\nExisting: ${dup.applicantName} (${dup.jobTitle || "—"}).\nAdd this candidate anyway?`
+      );
+      if (ok) return handleEnroll(application, true);
+      return;
+    }
     dispatch(fetchJobApplications());
     refresh();
   };
@@ -156,6 +189,35 @@ function Pipeline() {
     );
     if (res.payload) setSelected(res.payload);
     setNote("");
+  };
+
+  // Assign / reassign the recruiter owner (saved on blur).
+  const handleAssign = async (value) => {
+    if (!selected || value === (selected.assignedTo || "")) return;
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, assignedTo: value })
+    );
+    if (res.payload) setSelected(res.payload);
+  };
+
+  const handleAddTag = async () => {
+    const tag = tagInput.trim();
+    if (!tag || !selected) return;
+    const next = [...new Set([...(selected.tags || []), tag])];
+    setTagInput("");
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, tags: next })
+    );
+    if (res.payload) setSelected(res.payload);
+  };
+
+  const handleRemoveTag = async (tag) => {
+    if (!selected) return;
+    const next = (selected.tags || []).filter((t) => t !== tag);
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, tags: next })
+    );
+    if (res.payload) setSelected(res.payload);
   };
 
   const handleSweep = async () => {
@@ -241,6 +303,45 @@ function Pipeline() {
     await dispatch(deleteOffer({ id }));
   };
 
+  // ---- AI lead management ----
+  const handleAiScore = async () => {
+    if (!selected) return;
+    setAiScoring(true);
+    const res = await dispatch(aiScoreLead(selected._id));
+    if (res.payload && res.payload._id) setSelected(res.payload);
+    setAiScoring(false);
+  };
+
+  const handleAiPrioritize = async () => {
+    if (!pipelineId) return;
+    setAiPrioritizing(true);
+    await dispatch(aiPrioritizeLeads({ pipelineId }));
+    refresh();
+    setAiPrioritizing(false);
+  };
+
+  const handleAiEmail = async () => {
+    if (!selected) return;
+    setEmailBusy(true);
+    setEmailDraft(null);
+    const res = await dispatch(aiDraftLeadEmail({ applicationId: selected._id }));
+    if (res.payload) setEmailDraft(res.payload);
+    setEmailCopied(false);
+    setEmailBusy(false);
+  };
+
+  const handleCopyEmail = async () => {
+    if (!emailDraft) return;
+    const text = `Subject: ${emailDraft.subject}\n\n${emailDraft.body}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (e.g. insecure context) — no-op.
+    }
+  };
+
   const handleScheduleInterview = async (e) => {
     e.preventDefault();
     if (!selected || !ivForm.scheduledAt) return;
@@ -292,6 +393,7 @@ function Pipeline() {
   const filterApps = (apps) =>
     apps.filter((a) => {
       if (overdueOnly && !isOverdue(a.dueAt)) return false;
+      if (fitFilter && a.aiFit !== fitFilter) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
         return (
@@ -301,6 +403,81 @@ function Pipeline() {
       }
       return true;
     });
+
+  // Sort a column's cards by the selected key (default keeps backend order).
+  const sortApps = (apps) => {
+    if (!sortBy) return apps;
+    const arr = [...apps];
+    const num = (v) => (typeof v === "number" ? v : -Infinity);
+    const time = (v) => (v ? new Date(v).getTime() : Infinity);
+    arr.sort((a, b) => {
+      switch (sortBy) {
+        case "ai":
+          return num(b.aiScore) - num(a.aiScore); // highest fit first
+        case "sla":
+          return time(a.dueAt) - time(b.dueAt); // soonest due first
+        case "stage":
+          return time(a.stageEnteredAt) - time(b.stageEnteredAt); // longest in stage first
+        case "rating":
+          return (b.rating || 0) - (a.rating || 0);
+        default:
+          return 0;
+      }
+    });
+    return arr;
+  };
+
+  // Export the currently-visible (filtered) leads across all columns to CSV.
+  const exportCsv = () => {
+    const cols = [
+      "Name",
+      "Job Title",
+      "Stage",
+      "Assigned To",
+      "AI Score",
+      "AI Fit",
+      "Rating",
+      "Days In Stage",
+      "Open Tasks",
+      "SLA Due",
+      "Email",
+      "Phone",
+    ];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = [];
+    columns.forEach((col) => {
+      filterApps(col.applications).forEach((a) => {
+        rows.push([
+          a.applicantName,
+          a.jobTitle,
+          col.name,
+          a.assignedTo || "",
+          typeof a.aiScore === "number" ? a.aiScore : "",
+          a.aiFit || "",
+          a.rating || "",
+          a.stageEnteredAt != null ? daysInStage(a.stageEnteredAt) : "",
+          openTaskCount(a),
+          a.dueAt ? new Date(a.dueAt).toLocaleDateString() : "",
+          a.email || "",
+          a.phoneNumber || "",
+        ]);
+      });
+    });
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const name = (activePipeline?.name || "pipeline").replace(/\s+/g, "-").toLowerCase();
+    link.download = `${name}-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // ---- Native drag & drop between columns ----
   const findApp = (id) => {
@@ -342,6 +519,14 @@ function Pipeline() {
           </p>
         </div>
         <div className={styles.headerActions}>
+          <button
+            className={styles.aiBtn}
+            onClick={handleAiPrioritize}
+            disabled={aiPrioritizing}
+            title="Score all un-scored active leads with AI"
+          >
+            {aiPrioritizing ? "Scoring…" : "✨ AI Prioritize"}
+          </button>
           <button
             className={styles.tasksBtn}
             onClick={() => setShowTasks((s) => !s)}
@@ -482,17 +667,45 @@ function Pipeline() {
           />
           Overdue only
         </label>
-        {(search || overdueOnly) && (
+        <select
+          className={styles.fitSelect}
+          value={fitFilter}
+          onChange={(e) => setFitFilter(e.target.value)}
+          title="Filter by AI fit"
+        >
+          <option value="">All AI fits</option>
+          <option value="Strong">✨ Strong fit</option>
+          <option value="Moderate">✨ Moderate fit</option>
+          <option value="Weak">✨ Weak fit</option>
+        </select>
+        <select
+          className={styles.fitSelect}
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          title="Sort cards within each stage"
+        >
+          <option value="">Sort: Newest</option>
+          <option value="ai">Sort: AI score</option>
+          <option value="sla">Sort: SLA due</option>
+          <option value="stage">Sort: Time in stage</option>
+          <option value="rating">Sort: Rating</option>
+        </select>
+        {(search || overdueOnly || fitFilter || sortBy) && (
           <button
             className={styles.clearBtn}
             onClick={() => {
               setSearch("");
               setOverdueOnly(false);
+              setFitFilter("");
+              setSortBy("");
             }}
           >
             Clear
           </button>
         )}
+        <button className={styles.exportBtn} onClick={exportCsv}>
+          ⬇ Export CSV
+        </button>
         <span className={styles.hint}>Tip: drag a card to another column to move it.</span>
       </div>
 
@@ -502,7 +715,7 @@ function Pipeline() {
       ) : (
         <div className={styles.board}>
           {columns.map((col) => {
-            const visible = filterApps(col.applications);
+            const visible = sortApps(filterApps(col.applications));
             return (
             <div
               key={col.key}
@@ -538,9 +751,19 @@ function Pipeline() {
                   >
                     <div className={styles.cardTop}>
                       <strong className={styles.cardName}>{app.applicantName}</strong>
-                      {app.rating > 0 && (
-                        <span className={styles.rating}>★ {app.rating}</span>
-                      )}
+                      <span className={styles.cardTopRight}>
+                        {typeof app.aiScore === "number" && (
+                          <span
+                            className={`${styles.aiScore} ${styles["aiFit_" + (app.aiFit || "")]}`}
+                            title={`AI fit: ${app.aiFit || "n/a"}`}
+                          >
+                            ✨ {app.aiScore}
+                          </span>
+                        )}
+                        {app.rating > 0 && (
+                          <span className={styles.rating}>★ {app.rating}</span>
+                        )}
+                      </span>
                     </div>
                     <div className={styles.cardJob}>{app.jobTitle}</div>
                     <div className={styles.cardMeta}>
@@ -645,6 +868,143 @@ function Pipeline() {
                 </span>
               )}
             </div>
+
+            {/* Owner + tags */}
+            <div className={styles.metaEditRow}>
+              <label className={styles.metaField}>
+                Owner
+                <input
+                  type="text"
+                  placeholder="Assign recruiter"
+                  defaultValue={selected.assignedTo || ""}
+                  key={selected._id + (selected.assignedTo || "")}
+                  onBlur={(e) => handleAssign(e.target.value.trim())}
+                />
+              </label>
+              <div className={styles.metaField}>
+                Tags
+                <div className={styles.tagEditor}>
+                  {(selected.tags || []).map((t) => (
+                    <span key={t} className={styles.tagChip}>
+                      {t}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(t)}
+                        title="Remove tag"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    className={styles.tagInput}
+                    placeholder="+ tag"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddTag();
+                      }
+                    }}
+                    onBlur={handleAddTag}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* AI Insights */}
+            <div className={styles.sectionHead}>
+              <h4>✨ AI Insights</h4>
+              <button
+                className={styles.aiSmallBtn}
+                onClick={handleAiScore}
+                disabled={aiScoring}
+              >
+                {aiScoring
+                  ? "Analyzing…"
+                  : typeof selected.aiScore === "number"
+                  ? "Re-score"
+                  : "Score with AI"}
+              </button>
+            </div>
+
+            {typeof selected.aiScore === "number" ? (
+              <div className={styles.aiPanel}>
+                <div className={styles.aiScoreRow}>
+                  <span
+                    className={`${styles.aiScoreBig} ${styles["aiFit_" + (selected.aiFit || "")]}`}
+                  >
+                    {selected.aiScore}
+                  </span>
+                  <div>
+                    <div className={styles.aiFitLabel}>{selected.aiFit || "—"} fit</div>
+                    {selected.aiInsights?.summary && (
+                      <div className={styles.aiSummary}>{selected.aiInsights.summary}</div>
+                    )}
+                  </div>
+                </div>
+                {selected.aiInsights?.strengths?.length > 0 && (
+                  <div className={styles.aiBlock}>
+                    <span className={styles.aiBlockTitle}>Strengths</span>
+                    <ul>
+                      {selected.aiInsights.strengths.map((s, i) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {selected.aiInsights?.concerns?.length > 0 && (
+                  <div className={styles.aiBlock}>
+                    <span className={styles.aiBlockTitle}>Concerns</span>
+                    <ul>
+                      {selected.aiInsights.concerns.map((c, i) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {selected.aiInsights?.recommendedAction && (
+                  <div className={styles.aiAction}>
+                    <strong>Next step:</strong> {selected.aiInsights.recommendedAction}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className={styles.muted}>
+                Not scored yet. Run AI to assess this lead's fit.
+              </p>
+            )}
+
+            <div className={styles.aiEmailRow}>
+              <button
+                className={styles.aiSmallBtn}
+                onClick={handleAiEmail}
+                disabled={emailBusy}
+              >
+                {emailBusy ? "Drafting…" : "✍ Draft outreach email (AI)"}
+              </button>
+            </div>
+            {emailDraft && (
+              <div className={styles.aiEmailDraft}>
+                <div className={styles.aiEmailSubject}>
+                  <strong>Subject:</strong> {emailDraft.subject}
+                </div>
+                <textarea
+                  className={styles.aiEmailBody}
+                  readOnly
+                  value={emailDraft.body}
+                  rows={6}
+                />
+                <div className={styles.aiEmailFoot}>
+                  <button className={styles.aiSmallBtn} onClick={handleCopyEmail}>
+                    {emailCopied ? "✓ Copied" : "📋 Copy"}
+                  </button>
+                  <span className={styles.muted}>Paste into your email client to send.</span>
+                </div>
+              </div>
+            )}
 
             {/* Tasks */}
             <h4>Tasks</h4>

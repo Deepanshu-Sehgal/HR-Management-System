@@ -11,8 +11,17 @@ export const fetchRecruitmentOverview = createAsyncThunk(
   }
 );
 
+export const fetchRecruiterWorkload = createAsyncThunk(
+  "recruitmentAnalytics/workload",
+  async () => {
+    const res = await axios.get(`${API_BASE_URL}/pipelines/workload`);
+    return res.data;
+  }
+);
+
 const initialState = {
   overview: null,
+  workload: [],
   loading: false,
   error: null,
 };
@@ -34,6 +43,9 @@ const RecruitmentAnalyticsSlice = createSlice({
       .addCase(fetchRecruitmentOverview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(fetchRecruiterWorkload.fulfilled, (state, action) => {
+        state.workload = action.payload;
       });
   },
 });
