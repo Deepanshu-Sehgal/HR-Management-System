@@ -221,6 +221,22 @@ exports.enrollApplication = async (req, res) => {
     const app = await JobApplication.findById(applicationId);
     if (!app) return res.status(404).json({ message: "Application not found" });
 
+    // Duplicate-lead guard: block enrolling the same candidate (by email) into
+    // the same pipeline more than once, unless the caller explicitly overrides.
+    if (app.email && !req.body.force) {
+      const duplicate = await JobApplication.findOne({
+        _id: { $ne: app._id },
+        pipelineId: pipeline._id,
+        email: app.email,
+      }).select("_id applicantName stageKey jobTitle");
+      if (duplicate) {
+        return res.status(409).json({
+          message: `A lead with email ${app.email} is already in this pipeline.`,
+          duplicate,
+        });
+      }
+    }
+
     const sortedStages = [...pipeline.stages].sort((a, b) => a.order - b.order);
     const stage = stageKey
       ? sortedStages.find((s) => s.key === stageKey)
@@ -295,6 +311,26 @@ exports.moveStage = async (req, res) => {
       automation: automationNotes,
       application: app,
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update lightweight lead metadata: recruiter owner and tags.
+exports.updateApplicationMeta = async (req, res) => {
+  try {
+    const { assignedTo, tags } = req.body;
+    const app = await JobApplication.findById(req.params.id);
+    if (!app) return res.status(404).json({ message: "Application not found" });
+
+    if (assignedTo !== undefined) app.assignedTo = assignedTo;
+    if (Array.isArray(tags)) {
+      app.tags = [
+        ...new Set(tags.map((t) => String(t).trim()).filter(Boolean)),
+      ].slice(0, 20);
+    }
+    await app.save();
+    res.status(200).json({ message: "Application updated", application: app });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -437,6 +473,93 @@ exports.getTasks = async (req, res) => {
     });
 
     res.status(200).json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Recruiter workload distribution across active leads. Computed entirely in
+// the database via a single aggregation (no full-collection load): per owner,
+// count active leads, SLA-breached leads, open tasks, and average AI score.
+exports.getRecruiterWorkload = async (req, res) => {
+  try {
+    const now = new Date();
+
+    // Resolve the set of "active" stage keys once (small collection).
+    const pipelineFilter = req.query.pipelineId ? { _id: req.query.pipelineId } : {};
+    const pipelines = await Pipeline.find(pipelineFilter).select("stages");
+    const activeKeys = [
+      ...new Set(
+        pipelines.flatMap((p) =>
+          p.stages.filter((s) => s.category === "active").map((s) => s.key)
+        )
+      ),
+    ];
+
+    const match = { pipelineId: { $ne: null }, stageKey: { $in: activeKeys } };
+    if (req.query.pipelineId) {
+      const mongoose = require("mongoose");
+      match.pipelineId = new mongoose.Types.ObjectId(req.query.pipelineId);
+    }
+
+    const workload = await JobApplication.aggregate([
+      { $match: match },
+      {
+        $project: {
+          owner: {
+            $cond: [
+              { $in: ["$assignedTo", [null, ""]] },
+              "Unassigned",
+              "$assignedTo",
+            ],
+          },
+          isOverdue: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ["$dueAt", null] },
+                  { $lt: ["$dueAt", now] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+          openTasks: {
+            $size: {
+              $filter: {
+                input: { $ifNull: ["$tasks", []] },
+                as: "t",
+                cond: { $eq: ["$$t.done", false] },
+              },
+            },
+          },
+          aiScore: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$owner",
+          leads: { $sum: 1 },
+          overdue: { $sum: "$isOverdue" },
+          openTasks: { $sum: "$openTasks" },
+          avgAiScore: { $avg: "$aiScore" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          owner: "$_id",
+          leads: 1,
+          overdue: 1,
+          openTasks: 1,
+          avgAiScore: { $round: [{ $ifNull: ["$avgAiScore", 0] }, 0] },
+        },
+      },
+      { $sort: { leads: -1, owner: 1 } },
+    ]);
+
+    res.status(200).json(workload);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

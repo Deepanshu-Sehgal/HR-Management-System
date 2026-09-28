@@ -1,1 +1,26 @@
+# OS
 /.DS_Store
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build output
+Frontend/dist/
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Uploads (runtime, keep out of VCS)
+Backend/uploads/*
+!Backend/uploads/.gitkeep

@@ -50,14 +50,21 @@ export const fetchOverdue = createAsyncThunk(
 
 export const enrollApplication = createAsyncThunk(
   "pipeline/enroll",
-  async ({ applicationId, pipelineId, stageKey, by }) => {
-    const response = await axios.post(`${PIPELINES_URL}/enroll`, {
-      applicationId,
-      pipelineId,
-      stageKey,
-      by,
-    });
-    return response.data.application;
+  async ({ applicationId, pipelineId, stageKey, by, force }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${PIPELINES_URL}/enroll`, {
+        applicationId,
+        pipelineId,
+        stageKey,
+        by,
+        force,
+      });
+      return response.data.application;
+    } catch (err) {
+      // Surface the duplicate-lead 409 so the UI can offer to override.
+      if (err.response?.status === 409) return rejectWithValue(err.response.data);
+      throw err;
+    }
   }
 );
 
@@ -78,6 +85,17 @@ export const addActivity = createAsyncThunk(
     const response = await axios.post(
       `${PIPELINES_URL}/applications/${applicationId}/activity`,
       { message, by, type }
+    );
+    return response.data.application;
+  }
+);
+
+export const updateApplicationMeta = createAsyncThunk(
+  "pipeline/updateApplicationMeta",
+  async ({ applicationId, assignedTo, tags }) => {
+    const response = await axios.patch(
+      `${PIPELINES_URL}/applications/${applicationId}/meta`,
+      { assignedTo, tags }
     );
     return response.data.application;
   }
@@ -146,6 +164,38 @@ export const fetchTasks = createAsyncThunk(
     ).toString();
     const response = await axios.get(`${PIPELINES_URL}/tasks${qs ? `?${qs}` : ""}`);
     return response.data;
+  }
+);
+
+// ----- AI lead management -----
+export const aiScoreLead = createAsyncThunk(
+  "pipeline/aiScoreLead",
+  async (applicationId) => {
+    const response = await axios.post(
+      `${PIPELINES_URL}/applications/${applicationId}/ai-score`
+    );
+    return response.data.application;
+  }
+);
+
+export const aiPrioritizeLeads = createAsyncThunk(
+  "pipeline/aiPrioritize",
+  async ({ pipelineId, rescore } = {}) => {
+    const response = await axios.post(`${PIPELINES_URL}/${pipelineId}/ai-prioritize`, {
+      rescore: !!rescore,
+    });
+    return response.data;
+  }
+);
+
+export const aiDraftLeadEmail = createAsyncThunk(
+  "pipeline/aiDraftEmail",
+  async ({ applicationId, purpose }) => {
+    const response = await axios.post(
+      `${PIPELINES_URL}/applications/${applicationId}/ai-email`,
+      { purpose }
+    );
+    return response.data; // { subject, body }
   }
 );
 
@@ -272,6 +322,12 @@ const PipelineSlice = createSlice({
       })
       .addCase(fetchTasks.fulfilled, (state, action) => {
         state.tasks = action.payload;
+      })
+      .addCase(aiScoreLead.fulfilled, (state, action) => {
+        replaceApp(state, action.payload);
+      })
+      .addCase(updateApplicationMeta.fulfilled, (state, action) => {
+        replaceApp(state, action.payload);
       });
   },
 });
