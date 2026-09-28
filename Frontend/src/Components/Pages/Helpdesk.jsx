@@ -85,6 +85,48 @@ function Helpdesk() {
     setComment("");
   };
 
+  // Export the currently-visible (searched + filtered) tickets to CSV.
+  const exportCsv = () => {
+    const cols = [
+      "Ticket ID",
+      "Subject",
+      "Category",
+      "Priority",
+      "Status",
+      "Raised By",
+      "Email",
+      "Assigned To",
+      "SLA Due",
+      "Created",
+    ];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = visibleTickets.map((t) => [
+      t.ticketId,
+      t.subject,
+      t.category,
+      t.priority,
+      t.status,
+      t.raisedByName,
+      t.raisedByEmail || "",
+      t.assignedTo || "",
+      t.dueAt ? new Date(t.dueAt).toLocaleDateString() : "",
+      t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "",
+    ]);
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `helpdesk-tickets-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerRow}>
@@ -220,6 +262,13 @@ function Helpdesk() {
             <option key={c}>{c}</option>
           ))}
         </select>
+        <button
+          className={styles.exportBtn}
+          onClick={exportCsv}
+          disabled={visibleTickets.length === 0}
+        >
+          ⬇ Export CSV
+        </button>
       </div>
 
       {/* Ticket table */}
