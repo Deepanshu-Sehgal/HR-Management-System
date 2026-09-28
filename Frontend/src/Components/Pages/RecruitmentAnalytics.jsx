@@ -66,6 +66,31 @@ function RecruitmentAnalytics() {
     { label: "Offer Accept Rate", value: `${offers.acceptanceRate}%` },
   ];
 
+  const exportWorkloadCsv = () => {
+    const cols = ["Recruiter", "Active Leads", "Overdue", "Open Tasks", "Avg AI Score"];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = workload.map((w) => [
+      w.owner,
+      w.leads,
+      w.overdue,
+      w.openTasks,
+      w.avgAiScore || "",
+    ]);
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `recruiter-workload-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerRow}>
@@ -146,7 +171,14 @@ function RecruitmentAnalytics() {
 
       {/* Recruiter workload */}
       <div className={styles.panel} style={{ marginTop: 16 }}>
-        <h3>Recruiter workload (active leads)</h3>
+        <div className={styles.panelHead}>
+          <h3>Recruiter workload (active leads)</h3>
+          {workload.length > 0 && (
+            <button className={styles.exportBtn} onClick={exportWorkloadCsv}>
+              ⬇ Export CSV
+            </button>
+          )}
+        </div>
         {workload.length === 0 ? (
           <p className={styles.muted}>No active leads assigned yet.</p>
         ) : (

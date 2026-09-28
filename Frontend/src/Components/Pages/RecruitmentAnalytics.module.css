@@ -216,6 +216,29 @@
 }
 
 /* Recruiter workload table */
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.panelHead h3 {
+  margin: 0;
+}
+.exportBtn {
+  background: #fff;
+  border: 1px solid #16a34a;
+  color: #15803d;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.exportBtn:hover {
+  background: #f0fdf4;
+}
 .tableWrap {
   overflow-x: auto;
 }
