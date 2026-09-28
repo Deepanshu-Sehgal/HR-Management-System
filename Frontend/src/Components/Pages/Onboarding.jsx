@@ -82,6 +82,50 @@ function Onboarding() {
     setShowForm(false);
   };
 
+  // Export the currently-visible (searched) onboardings to CSV.
+  const exportCsv = () => {
+    const cols = [
+      "Employee",
+      "Email",
+      "Position",
+      "Department",
+      "Start Date",
+      "Status",
+      "Progress %",
+      "Tasks Done",
+      "Total Tasks",
+    ];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = visibleItems.map((o) => {
+      const total = (o.tasks || []).length;
+      const done = (o.tasks || []).filter((t) => t.status === "Done").length;
+      return [
+        o.employeeName,
+        o.employeeEmail || "",
+        o.position || "",
+        o.department || "",
+        o.startDate ? new Date(o.startDate).toLocaleDateString() : "",
+        o.status,
+        o.progress,
+        done,
+        total,
+      ];
+    });
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `onboardings-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const toggleTask = async (o, task) => {
     await dispatch(
       updateOnboardingTask({
@@ -115,9 +159,16 @@ function Onboarding() {
             Auto-generated checklists that walk each new hire from offer to day-one ready.
           </p>
         </div>
-        <button className={styles.addBtn} onClick={() => setShowForm((s) => !s)}>
-          {showForm ? "Cancel" : "+ New Onboarding"}
-        </button>
+        <div className={styles.headerActions}>
+          {items.length > 0 && (
+            <button className={styles.exportBtn} onClick={exportCsv}>
+              ⬇ Export CSV
+            </button>
+          )}
+          <button className={styles.addBtn} onClick={() => setShowForm((s) => !s)}>
+            {showForm ? "Cancel" : "+ New Onboarding"}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

@@ -33,6 +33,26 @@
 .addBtn:hover {
   background: #4338ca;
 }
+.headerActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.exportBtn {
+  background: #fff;
+  border: 1px solid #16a34a;
+  color: #15803d;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.exportBtn:hover {
+  background: #f0fdf4;
+}
 .muted {
   color: #9ca3af;
 }
