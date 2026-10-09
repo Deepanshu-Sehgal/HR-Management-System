@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchOnboardings,
@@ -23,6 +23,24 @@ const EMPTY = {
 const taskOverdue = (t) =>
   t.status !== "Done" && t.dueDate && new Date(t.dueDate).getTime() < Date.now();
 
+// Whole-day difference between the start date and today.
+const daysToStart = (startDate) => {
+  if (!startDate) return null;
+  const d = new Date(startDate);
+  d.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((d - today) / (1000 * 60 * 60 * 24));
+};
+
+const startLabel = (startDate) => {
+  const n = daysToStart(startDate);
+  if (n == null) return "";
+  if (n === 0) return "Starts today";
+  if (n > 0) return `Starts in ${n}d`;
+  return `Started ${Math.abs(n)}d ago`;
+};
+
 function Onboarding() {
   const dispatch = useDispatch();
   const { items, stats, loading } = useSelector((state) => state.onboarding);
@@ -31,6 +49,19 @@ function Onboarding() {
   const [form, setForm] = useState(EMPTY);
   const [selected, setSelected] = useState(null);
   const [newTask, setNewTask] = useState({ title: "", category: "HR", dueDate: "" });
+  const [search, setSearch] = useState("");
+
+  // Filter onboardings by name / position / department (memoized).
+  const visibleItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter(
+      (o) =>
+        (o.employeeName || "").toLowerCase().includes(q) ||
+        (o.position || "").toLowerCase().includes(q) ||
+        (o.department || "").toLowerCase().includes(q)
+    );
+  }, [items, search]);
 
   useEffect(() => {
     dispatch(fetchOnboardings());
@@ -49,6 +80,50 @@ function Onboarding() {
     dispatch(fetchOnboardingStats());
     setForm(EMPTY);
     setShowForm(false);
+  };
+
+  // Export the currently-visible (searched) onboardings to CSV.
+  const exportCsv = () => {
+    const cols = [
+      "Employee",
+      "Email",
+      "Position",
+      "Department",
+      "Start Date",
+      "Status",
+      "Progress %",
+      "Tasks Done",
+      "Total Tasks",
+    ];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = visibleItems.map((o) => {
+      const total = (o.tasks || []).length;
+      const done = (o.tasks || []).filter((t) => t.status === "Done").length;
+      return [
+        o.employeeName,
+        o.employeeEmail || "",
+        o.position || "",
+        o.department || "",
+        o.startDate ? new Date(o.startDate).toLocaleDateString() : "",
+        o.status,
+        o.progress,
+        done,
+        total,
+      ];
+    });
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `onboardings-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const toggleTask = async (o, task) => {
@@ -84,9 +159,16 @@ function Onboarding() {
             Auto-generated checklists that walk each new hire from offer to day-one ready.
           </p>
         </div>
-        <button className={styles.addBtn} onClick={() => setShowForm((s) => !s)}>
-          {showForm ? "Cancel" : "+ New Onboarding"}
-        </button>
+        <div className={styles.headerActions}>
+          {items.length > 0 && (
+            <button className={styles.exportBtn} onClick={exportCsv}>
+              ⬇ Export CSV
+            </button>
+          )}
+          <button className={styles.addBtn} onClick={() => setShowForm((s) => !s)}>
+            {showForm ? "Cancel" : "+ New Onboarding"}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -161,14 +243,31 @@ function Onboarding() {
         </form>
       )}
 
+      {/* Search */}
+      {items.length > 0 && (
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="🔍 Search name, position, or department..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      )}
+
       {/* List */}
       {loading ? (
         <p>Loading...</p>
-      ) : items.length === 0 ? (
-        <p className={styles.muted}>No onboardings yet. Create one to get started.</p>
+      ) : visibleItems.length === 0 ? (
+        <p className={styles.muted}>
+          {items.length === 0
+            ? "No onboardings yet. Create one to get started."
+            : "No onboardings match your search."}
+        </p>
       ) : (
         <div className={styles.grid}>
-          {items.map((o) => (
+          {visibleItems.map((o) => {
+            const days = daysToStart(o.startDate);
+            return (
             <div key={o._id} className={styles.card} onClick={() => setSelected(o)}>
               <div className={styles.cardHead}>
                 <strong>{o.employeeName}</strong>
@@ -181,6 +280,15 @@ function Onboarding() {
               </div>
               <div className={styles.cardSub}>
                 Starts {new Date(o.startDate).toLocaleDateString()}
+                {days != null && o.status !== "Completed" && (
+                  <span
+                    className={`${styles.startPill} ${
+                      days < 0 ? styles.startPast : days <= 3 ? styles.startSoon : ""
+                    }`}
+                  >
+                    {startLabel(o.startDate)}
+                  </span>
+                )}
               </div>
               <div className={styles.progressWrap}>
                 <div className={styles.progressBar}>
@@ -189,7 +297,8 @@ function Onboarding() {
                 <span className={styles.progressLabel}>{o.progress}%</span>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

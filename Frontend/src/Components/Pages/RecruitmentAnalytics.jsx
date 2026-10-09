@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchRecruitmentOverview } from "../../redux/Slices/RecruitmentAnalyticsSlice";
+import {
+  fetchRecruitmentOverview,
+  fetchRecruiterWorkload,
+} from "../../redux/Slices/RecruitmentAnalyticsSlice";
 import styles from "./RecruitmentAnalytics.module.css";
 
 const BAR_COLORS = ["#4f46e5", "#0ea5e9", "#8b5cf6", "#f59e0b", "#16a34a", "#dc2626"];
@@ -39,10 +42,13 @@ function BarList({ title, data, labelKey, valueKey }) {
 
 function RecruitmentAnalytics() {
   const dispatch = useDispatch();
-  const { overview, loading, error } = useSelector((state) => state.recruitmentAnalytics);
+  const { overview, workload, loading, error } = useSelector(
+    (state) => state.recruitmentAnalytics
+  );
 
   useEffect(() => {
     dispatch(fetchRecruitmentOverview());
+    dispatch(fetchRecruiterWorkload());
   }, [dispatch]);
 
   if (loading && !overview) return <div className={styles.container}><p>Loading analytics...</p></div>;
@@ -60,6 +66,31 @@ function RecruitmentAnalytics() {
     { label: "Offer Accept Rate", value: `${offers.acceptanceRate}%` },
   ];
 
+  const exportWorkloadCsv = () => {
+    const cols = ["Recruiter", "Active Leads", "Overdue", "Open Tasks", "Avg AI Score"];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = workload.map((w) => [
+      w.owner,
+      w.leads,
+      w.overdue,
+      w.openTasks,
+      w.avgAiScore || "",
+    ]);
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `recruiter-workload-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerRow}>
@@ -69,7 +100,13 @@ function RecruitmentAnalytics() {
             A live snapshot across every pipeline — candidates, interviews, offers, and SLAs.
           </p>
         </div>
-        <button className={styles.refreshBtn} onClick={() => dispatch(fetchRecruitmentOverview())}>
+        <button
+          className={styles.refreshBtn}
+          onClick={() => {
+            dispatch(fetchRecruitmentOverview());
+            dispatch(fetchRecruiterWorkload());
+          }}
+        >
           ↻ Refresh
         </button>
       </div>
@@ -130,6 +167,46 @@ function RecruitmentAnalytics() {
             <span className={styles.acceptLabel}>{offers.acceptanceRate}% acceptance</span>
           </div>
         </div>
+      </div>
+
+      {/* Recruiter workload */}
+      <div className={styles.panel} style={{ marginTop: 16 }}>
+        <div className={styles.panelHead}>
+          <h3>Recruiter workload (active leads)</h3>
+          {workload.length > 0 && (
+            <button className={styles.exportBtn} onClick={exportWorkloadCsv}>
+              ⬇ Export CSV
+            </button>
+          )}
+        </div>
+        {workload.length === 0 ? (
+          <p className={styles.muted}>No active leads assigned yet.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.wlTable}>
+              <thead>
+                <tr>
+                  <th>Recruiter</th>
+                  <th>Active leads</th>
+                  <th>Overdue</th>
+                  <th>Open tasks</th>
+                  <th>Avg AI</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workload.map((w) => (
+                  <tr key={w.owner}>
+                    <td>{w.owner}</td>
+                    <td>{w.leads}</td>
+                    <td className={w.overdue ? styles.bad : ""}>{w.overdue}</td>
+                    <td>{w.openTasks}</td>
+                    <td>{w.avgAiScore || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

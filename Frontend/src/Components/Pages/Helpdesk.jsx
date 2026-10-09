@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchTickets,
@@ -34,8 +34,22 @@ function Helpdesk() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [filter, setFilter] = useState({ status: "", priority: "", category: "" });
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [comment, setComment] = useState("");
+
+  // Client-side text search over already-fetched tickets (memoized so it only
+  // recomputes when the ticket list or query changes).
+  const visibleTickets = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter(
+      (t) =>
+        (t.subject || "").toLowerCase().includes(q) ||
+        (t.ticketId || "").toLowerCase().includes(q) ||
+        (t.raisedByName || "").toLowerCase().includes(q)
+    );
+  }, [items, search]);
 
   useEffect(() => {
     dispatch(fetchTickets(filter));
@@ -69,6 +83,48 @@ function Helpdesk() {
     if (!comment.trim() || !current) return;
     await dispatch(addTicketComment({ id: current._id, message: comment.trim(), by: "HR" }));
     setComment("");
+  };
+
+  // Export the currently-visible (searched + filtered) tickets to CSV.
+  const exportCsv = () => {
+    const cols = [
+      "Ticket ID",
+      "Subject",
+      "Category",
+      "Priority",
+      "Status",
+      "Raised By",
+      "Email",
+      "Assigned To",
+      "SLA Due",
+      "Created",
+    ];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = visibleTickets.map((t) => [
+      t.ticketId,
+      t.subject,
+      t.category,
+      t.priority,
+      t.status,
+      t.raisedByName,
+      t.raisedByEmail || "",
+      t.assignedTo || "",
+      t.dueAt ? new Date(t.dueAt).toLocaleDateString() : "",
+      t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "",
+    ]);
+    const csv = [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `helpdesk-tickets-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -172,6 +228,13 @@ function Helpdesk() {
 
       {/* Filters */}
       <div className={styles.filters}>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="🔍 Search ID, subject, or requester..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <select
           value={filter.status}
           onChange={(e) => setFilter({ ...filter, status: e.target.value })}
@@ -199,12 +262,19 @@ function Helpdesk() {
             <option key={c}>{c}</option>
           ))}
         </select>
+        <button
+          className={styles.exportBtn}
+          onClick={exportCsv}
+          disabled={visibleTickets.length === 0}
+        >
+          ⬇ Export CSV
+        </button>
       </div>
 
       {/* Ticket table */}
       {loading ? (
         <p>Loading...</p>
-      ) : items.length === 0 ? (
+      ) : visibleTickets.length === 0 ? (
         <p className={styles.muted}>No tickets match.</p>
       ) : (
         <div className={styles.tableWrap}>
@@ -221,7 +291,7 @@ function Helpdesk() {
               </tr>
             </thead>
             <tbody>
-              {items.map((t) => (
+              {visibleTickets.map((t) => (
                 <tr key={t._id} onClick={() => setSelected(t)} className={styles.row}>
                   <td className={styles.mono}>{t.ticketId}</td>
                   <td>{t.subject}</td>
