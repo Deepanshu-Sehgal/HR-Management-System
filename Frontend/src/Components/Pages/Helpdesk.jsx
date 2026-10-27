@@ -269,6 +269,18 @@ function Helpdesk() {
         >
           ⬇ Export CSV
         </button>
+        <button
+          className={styles.refreshBtn}
+          onClick={() => {
+            dispatch(fetchTickets(filter));
+            dispatch(fetchTicketStats());
+          }}
+        >
+          ↻ Refresh
+        </button>
+        <span className={styles.resultCount}>
+          Showing {visibleTickets.length} of {items.length}
+        </span>
       </div>
 
       {/* Ticket table */}

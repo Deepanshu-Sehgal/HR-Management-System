@@ -163,6 +163,24 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.refreshBtn {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.refreshBtn:hover {
+  background: #f3f4f6;
+}
+.resultCount {
+  font-size: 13px;
+  color: #6b7280;
+  margin-left: auto;
+  align-self: center;
+}
 
 /* Table */
 .tableWrap {
