@@ -19,3 +19,4 @@ test is done.
 | `BrokenCSharp.cs` | C# | Missing semicolons; missing closing brace |
 | `broken_dart1.dart` | Dart | Missing semicolon; unclosed list; missing brace |
 | `broken_dart2.dart` | Dart | Missing semicolon; malformed method params |
+| `broken_php.php` | PHP | Missing semicolon; unclosed array; missing brace |
