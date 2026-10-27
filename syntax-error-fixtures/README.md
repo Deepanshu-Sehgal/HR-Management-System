@@ -23,3 +23,6 @@ test is done.
 | `broken_rust.rs` | Rust | Missing semicolon; unclosed `vec!`; missing brace |
 | `broken_kotlin.kt` | Kotlin | Missing `)` on call; unclosed list; missing brace |
 | `broken_swift.swift` | Swift | Missing `)` in params; unclosed array literal |
+| `broken_typescript.ts` | TypeScript | Missing `)` in params; unclosed array |
+| `broken_sql.sql` | SQL | Missing `)` in INSERT; unterminated string |
+| `broken_bash.sh` | Bash | Missing `fi` and `done` (unexpected EOF) |
