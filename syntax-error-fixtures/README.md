@@ -20,3 +20,6 @@ test is done.
 | `broken_dart1.dart` | Dart | Missing semicolon; unclosed list; missing brace |
 | `broken_dart2.dart` | Dart | Missing semicolon; malformed method params |
 | `broken_php.php` | PHP | Missing semicolon; unclosed array; missing brace |
+| `broken_rust.rs` | Rust | Missing semicolon; unclosed `vec!`; missing brace |
+| `broken_kotlin.kt` | Kotlin | Missing `)` on call; unclosed list; missing brace |
+| `broken_swift.swift` | Swift | Missing `)` in params; unclosed array literal |
