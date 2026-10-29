@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchRecruitmentOverview,
@@ -45,6 +45,24 @@ function RecruitmentAnalytics() {
   const { overview, workload, loading, error } = useSelector(
     (state) => state.recruitmentAnalytics
   );
+  const [wlSort, setWlSort] = useState({ key: "leads", dir: "desc" });
+
+  // Sort the workload table by the chosen column (text asc, numbers respect dir).
+  const sortedWorkload = useMemo(() => {
+    const { key, dir } = wlSort;
+    const mult = dir === "asc" ? 1 : -1;
+    return [...workload].sort((a, b) => {
+      if (key === "owner") return mult * String(a.owner).localeCompare(String(b.owner));
+      return mult * ((a[key] || 0) - (b[key] || 0));
+    });
+  }, [workload, wlSort]);
+
+  const toggleWlSort = (key) =>
+    setWlSort((s) =>
+      s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" }
+    );
+  const sortArrow = (key) =>
+    wlSort.key === key ? (wlSort.dir === "asc" ? " ▲" : " ▼") : "";
 
   useEffect(() => {
     dispatch(fetchRecruitmentOverview());
@@ -186,15 +204,25 @@ function RecruitmentAnalytics() {
             <table className={styles.wlTable}>
               <thead>
                 <tr>
-                  <th>Recruiter</th>
-                  <th>Active leads</th>
-                  <th>Overdue</th>
-                  <th>Open tasks</th>
-                  <th>Avg AI</th>
+                  <th className={styles.sortable} onClick={() => toggleWlSort("owner")}>
+                    Recruiter{sortArrow("owner")}
+                  </th>
+                  <th className={styles.sortable} onClick={() => toggleWlSort("leads")}>
+                    Active leads{sortArrow("leads")}
+                  </th>
+                  <th className={styles.sortable} onClick={() => toggleWlSort("overdue")}>
+                    Overdue{sortArrow("overdue")}
+                  </th>
+                  <th className={styles.sortable} onClick={() => toggleWlSort("openTasks")}>
+                    Open tasks{sortArrow("openTasks")}
+                  </th>
+                  <th className={styles.sortable} onClick={() => toggleWlSort("avgAiScore")}>
+                    Avg AI{sortArrow("avgAiScore")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {workload.map((w) => (
+                {sortedWorkload.map((w) => (
                   <tr key={w.owner}>
                     <td>{w.owner}</td>
                     <td>{w.leads}</td>

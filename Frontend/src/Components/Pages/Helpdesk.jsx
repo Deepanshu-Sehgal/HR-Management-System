@@ -35,21 +35,42 @@ function Helpdesk() {
   const [form, setForm] = useState(EMPTY);
   const [filter, setFilter] = useState({ status: "", priority: "", category: "" });
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("");
   const [selected, setSelected] = useState(null);
   const [comment, setComment] = useState("");
 
-  // Client-side text search over already-fetched tickets (memoized so it only
-  // recomputes when the ticket list or query changes).
+  // Client-side search + sort over already-fetched tickets (memoized so it
+  // only recomputes when the list, query, or sort changes).
   const visibleTickets = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter(
-      (t) =>
-        (t.subject || "").toLowerCase().includes(q) ||
-        (t.ticketId || "").toLowerCase().includes(q) ||
-        (t.raisedByName || "").toLowerCase().includes(q)
-    );
-  }, [items, search]);
+    let list = !q
+      ? items
+      : items.filter(
+          (t) =>
+            (t.subject || "").toLowerCase().includes(q) ||
+            (t.ticketId || "").toLowerCase().includes(q) ||
+            (t.raisedByName || "").toLowerCase().includes(q)
+        );
+    if (!sortBy) return list;
+
+    const prio = { Urgent: 0, High: 1, Medium: 2, Low: 3 };
+    const statusOrder = { Open: 0, "In Progress": 1, Resolved: 2, Closed: 3 };
+    const time = (v) => (v ? new Date(v).getTime() : Infinity);
+    return [...list].sort((a, b) => {
+      switch (sortBy) {
+        case "priority":
+          return (prio[a.priority] ?? 9) - (prio[b.priority] ?? 9);
+        case "sla":
+          return time(a.dueAt) - time(b.dueAt);
+        case "status":
+          return (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+        case "created":
+          return time(b.createdAt) - time(a.createdAt);
+        default:
+          return 0;
+      }
+    });
+  }, [items, search, sortBy]);
 
   useEffect(() => {
     dispatch(fetchTickets(filter));
@@ -261,6 +282,13 @@ function Helpdesk() {
           {CATEGORIES.map((c) => (
             <option key={c}>{c}</option>
           ))}
+        </select>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="">Sort: Default</option>
+          <option value="priority">Sort: Priority</option>
+          <option value="sla">Sort: SLA due</option>
+          <option value="created">Sort: Newest</option>
+          <option value="status">Sort: Status</option>
         </select>
         <button
           className={styles.exportBtn}

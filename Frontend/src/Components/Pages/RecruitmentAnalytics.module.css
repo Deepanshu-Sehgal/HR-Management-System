@@ -265,3 +265,11 @@
 .wlTable tbody tr:hover {
   background: #f9fafb;
 }
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.sortable:hover {
+  color: #4f46e5;
+}
