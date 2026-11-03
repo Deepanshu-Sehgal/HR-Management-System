@@ -706,6 +706,10 @@ function Pipeline() {
         <button className={styles.exportBtn} onClick={exportCsv}>
           ⬇ Export CSV
         </button>
+        <span className={styles.leadCount}>
+          {columns.reduce((s, c) => s + filterApps(c.applications).length, 0)} of{" "}
+          {columns.reduce((s, c) => s + c.applications.length, 0)} leads
+        </span>
         <span className={styles.hint}>Tip: drag a card to another column to move it.</span>
       </div>
 

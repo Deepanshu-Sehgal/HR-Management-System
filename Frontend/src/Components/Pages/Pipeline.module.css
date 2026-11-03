@@ -678,6 +678,14 @@
 .exportBtn:hover {
   background: #f0fdf4;
 }
+.leadCount {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 3px 10px;
+}
 .hint {
   color: #9ca3af;
   font-size: 12px;
