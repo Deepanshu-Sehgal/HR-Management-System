@@ -196,6 +196,17 @@ function Onboarding() {
             </span>
             <span className={styles.statLabel}>Overdue Tasks</span>
           </div>
+          <div className={styles.stat}>
+            <span className={styles.statValue}>
+              {items.length
+                ? Math.round(
+                    items.reduce((s, o) => s + (o.progress || 0), 0) / items.length
+                  )
+                : 0}
+              %
+            </span>
+            <span className={styles.statLabel}>Avg Completion</span>
+          </div>
         </div>
       )}
 
