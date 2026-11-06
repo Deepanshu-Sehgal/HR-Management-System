@@ -26,3 +26,6 @@ test is done.
 | `broken_typescript.ts` | TypeScript | Missing `)` in params; unclosed array |
 | `broken_sql.sql` | SQL | Missing `)` in INSERT; unterminated string |
 | `broken_bash.sh` | Bash | Missing `fi` and `done` (unexpected EOF) |
+| `broken_lua.lua` | Lua | Missing `end` on function; unclosed table `{` |
+| `broken_r.R` | R | Missing `)` on `paste`/`c` calls |
+| `broken_perl.pl` | Perl | Missing semicolon; unclosed list; missing brace |
