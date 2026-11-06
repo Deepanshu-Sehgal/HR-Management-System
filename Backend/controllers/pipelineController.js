@@ -316,10 +316,10 @@ exports.moveStage = async (req, res) => {
   }
 };
 
-// Update lightweight lead metadata: recruiter owner and tags.
+// Update lightweight lead metadata: recruiter owner, tags, and rating.
 exports.updateApplicationMeta = async (req, res) => {
   try {
-    const { assignedTo, tags } = req.body;
+    const { assignedTo, tags, rating } = req.body;
     const app = await JobApplication.findById(req.params.id);
     if (!app) return res.status(404).json({ message: "Application not found" });
 
@@ -329,6 +329,7 @@ exports.updateApplicationMeta = async (req, res) => {
         ...new Set(tags.map((t) => String(t).trim()).filter(Boolean)),
       ].slice(0, 20);
     }
+    if (rating !== undefined) app.rating = rating;
     await app.save();
     res.status(200).json({ message: "Application updated", application: app });
   } catch (error) {

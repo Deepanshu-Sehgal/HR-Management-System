@@ -80,6 +80,7 @@ function Pipeline() {
   const [search, setSearch] = useState("");
   const [overdueOnly, setOverdueOnly] = useState(false);
   const [fitFilter, setFitFilter] = useState(""); // "", Strong, Moderate, Weak
+  const [ownerFilter, setOwnerFilter] = useState(""); // "", <recruiter>, __unassigned__
   const [sortBy, setSortBy] = useState(""); // "", ai, sla, stage, rating
   const [emailCopied, setEmailCopied] = useState(false);
   const [tagInput, setTagInput] = useState("");
@@ -216,6 +217,16 @@ function Pipeline() {
     const next = (selected.tags || []).filter((t) => t !== tag);
     const res = await dispatch(
       updateApplicationMeta({ applicationId: selected._id, tags: next })
+    );
+    if (res.payload) setSelected(res.payload);
+  };
+
+  // Set (or clear, by re-clicking the current value) the candidate rating.
+  const handleRate = async (value) => {
+    if (!selected) return;
+    const next = selected.rating === value ? 0 : value;
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, rating: next })
     );
     if (res.payload) setSelected(res.payload);
   };
@@ -390,10 +401,20 @@ function Pipeline() {
   };
 
   // Apply the search + overdue-only filters to a column's cards.
+  // Distinct recruiter owners present on the board (for the owner filter).
+  const owners = useMemo(() => {
+    const set = new Set();
+    columns.forEach((c) => c.applications.forEach((a) => a.assignedTo && set.add(a.assignedTo)));
+    return [...set].sort();
+  }, [columns]);
+
   const filterApps = (apps) =>
     apps.filter((a) => {
       if (overdueOnly && !isOverdue(a.dueAt)) return false;
       if (fitFilter && a.aiFit !== fitFilter) return false;
+      if (ownerFilter === "__unassigned__" && a.assignedTo) return false;
+      if (ownerFilter && ownerFilter !== "__unassigned__" && a.assignedTo !== ownerFilter)
+        return false;
       if (search.trim()) {
         const q = search.toLowerCase();
         return (
@@ -680,6 +701,20 @@ function Pipeline() {
         </select>
         <select
           className={styles.fitSelect}
+          value={ownerFilter}
+          onChange={(e) => setOwnerFilter(e.target.value)}
+          title="Filter by recruiter owner"
+        >
+          <option value="">All owners</option>
+          <option value="__unassigned__">Unassigned</option>
+          {owners.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+        <select
+          className={styles.fitSelect}
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
           title="Sort cards within each stage"
@@ -690,13 +725,14 @@ function Pipeline() {
           <option value="stage">Sort: Time in stage</option>
           <option value="rating">Sort: Rating</option>
         </select>
-        {(search || overdueOnly || fitFilter || sortBy) && (
+        {(search || overdueOnly || fitFilter || ownerFilter || sortBy) && (
           <button
             className={styles.clearBtn}
             onClick={() => {
               setSearch("");
               setOverdueOnly(false);
               setFitFilter("");
+              setOwnerFilter("");
               setSortBy("");
             }}
           >
@@ -873,7 +909,7 @@ function Pipeline() {
               )}
             </div>
 
-            {/* Owner + tags */}
+            {/* Owner + rating + tags */}
             <div className={styles.metaEditRow}>
               <label className={styles.metaField}>
                 Owner
@@ -885,6 +921,21 @@ function Pipeline() {
                   onBlur={(e) => handleAssign(e.target.value.trim())}
                 />
               </label>
+              <div className={styles.metaField}>
+                Rating
+                <div className={styles.ratePick}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <span
+                      key={n}
+                      className={n <= (selected.rating || 0) ? styles.starOn : styles.starOff}
+                      onClick={() => handleRate(n)}
+                      title={`Rate ${n}/5`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
               <div className={styles.metaField}>
                 Tags
                 <div className={styles.tagEditor}>

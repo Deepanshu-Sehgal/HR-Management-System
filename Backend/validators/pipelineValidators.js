@@ -51,4 +51,5 @@ exports.addTaskSchema = Joi.object({
 exports.updateMetaSchema = Joi.object({
   assignedTo: Joi.string().allow(""),
   tags: Joi.array().items(Joi.string().trim().max(40)).max(20),
+  rating: Joi.number().integer().min(0).max(5),
 }).min(1);
