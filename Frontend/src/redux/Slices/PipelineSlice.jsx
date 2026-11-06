@@ -92,10 +92,14 @@ export const addActivity = createAsyncThunk(
 
 export const updateApplicationMeta = createAsyncThunk(
   "pipeline/updateApplicationMeta",
-  async ({ applicationId, assignedTo, tags }) => {
+  async ({ applicationId, assignedTo, tags, rating }) => {
+    const body = {};
+    if (assignedTo !== undefined) body.assignedTo = assignedTo;
+    if (tags !== undefined) body.tags = tags;
+    if (rating !== undefined) body.rating = rating;
     const response = await axios.patch(
       `${PIPELINES_URL}/applications/${applicationId}/meta`,
-      { assignedTo, tags }
+      body
     );
     return response.data.application;
   }

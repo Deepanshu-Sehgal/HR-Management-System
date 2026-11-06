@@ -1082,6 +1082,12 @@
   font-size: 18px;
   cursor: pointer;
 }
+.ratePick {
+  display: flex;
+  gap: 3px;
+  font-size: 20px;
+  cursor: pointer;
+}
 .starOn {
   color: #f59e0b;
 }

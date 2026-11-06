@@ -220,6 +220,16 @@ function Pipeline() {
     if (res.payload) setSelected(res.payload);
   };
 
+  // Set (or clear, by re-clicking the current value) the candidate rating.
+  const handleRate = async (value) => {
+    if (!selected) return;
+    const next = selected.rating === value ? 0 : value;
+    const res = await dispatch(
+      updateApplicationMeta({ applicationId: selected._id, rating: next })
+    );
+    if (res.payload) setSelected(res.payload);
+  };
+
   const handleSweep = async () => {
     setSweeping(true);
     await dispatch(runSlaSweep());
@@ -873,7 +883,7 @@ function Pipeline() {
               )}
             </div>
 
-            {/* Owner + tags */}
+            {/* Owner + rating + tags */}
             <div className={styles.metaEditRow}>
               <label className={styles.metaField}>
                 Owner
@@ -885,6 +895,21 @@ function Pipeline() {
                   onBlur={(e) => handleAssign(e.target.value.trim())}
                 />
               </label>
+              <div className={styles.metaField}>
+                Rating
+                <div className={styles.ratePick}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <span
+                      key={n}
+                      className={n <= (selected.rating || 0) ? styles.starOn : styles.starOff}
+                      onClick={() => handleRate(n)}
+                      title={`Rate ${n}/5`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
               <div className={styles.metaField}>
                 Tags
                 <div className={styles.tagEditor}>
