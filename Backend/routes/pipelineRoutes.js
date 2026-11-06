@@ -55,6 +55,7 @@ router.patch(
   validate(updateMetaSchema),
   pipelineController.updateApplicationMeta
 );
+router.patch("/applications/:id/unenroll", pipelineController.unenrollApplication);
 router.post("/applications/:id/activity", pipelineController.addActivity);
 
 // Per-application task tracking

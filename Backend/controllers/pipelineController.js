@@ -337,6 +337,31 @@ exports.updateApplicationMeta = async (req, res) => {
   }
 };
 
+// Remove an application from its pipeline (keeps the JobApplication record;
+// clears stage/SLA so it returns to the unenrolled pool).
+exports.unenrollApplication = async (req, res) => {
+  try {
+    const app = await JobApplication.findById(req.params.id);
+    if (!app) return res.status(404).json({ message: "Application not found" });
+    if (!app.pipelineId)
+      return res.status(400).json({ message: "Application is not in a pipeline" });
+
+    app.activities.push({
+      type: "system",
+      message: "Removed from pipeline",
+      by: req.body.by || "HR",
+    });
+    app.pipelineId = null;
+    app.stageKey = null;
+    app.stageEnteredAt = undefined;
+    app.dueAt = null;
+    await app.save();
+    res.status(200).json({ message: "Application removed from pipeline", application: app });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Append a manual note/comment to an application's activity timeline.
 exports.addActivity = async (req, res) => {
   try {

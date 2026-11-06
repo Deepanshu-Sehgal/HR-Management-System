@@ -7,6 +7,7 @@ import {
   fetchOverdue,
   moveStage,
   enrollApplication,
+  unenrollApplication,
   addActivity,
   updateApplicationMeta,
   runSlaSweep,
@@ -181,6 +182,17 @@ function Pipeline() {
     }
     dispatch(fetchJobApplications());
     refresh();
+  };
+
+  const handleUnenroll = async (application) => {
+    const ok = window.confirm(
+      `Remove ${application.applicantName} from the pipeline? They'll return to the waiting list (the application is kept).`
+    );
+    if (!ok) return;
+    await dispatch(unenrollApplication({ applicationId: application._id, by: "HR" }));
+    setSelected(null);
+    dispatch(fetchJobApplications());
+    dispatch(fetchFunnel(pipelineId));
   };
 
   const handleAddNote = async () => {
@@ -893,9 +905,18 @@ function Pipeline() {
                 <h2>{selected.applicantName}</h2>
                 <p>{selected.jobTitle}</p>
               </div>
-              <button className={styles.closeBtn} onClick={() => setSelected(null)}>
-                ✕
-              </button>
+              <div className={styles.drawerHeaderBtns}>
+                <button
+                  className={styles.removeBtn}
+                  onClick={() => handleUnenroll(selected)}
+                  title="Remove this candidate from the pipeline"
+                >
+                  Remove
+                </button>
+                <button className={styles.closeBtn} onClick={() => setSelected(null)}>
+                  ✕
+                </button>
+              </div>
             </div>
 
             <div className={styles.drawerMeta}>
