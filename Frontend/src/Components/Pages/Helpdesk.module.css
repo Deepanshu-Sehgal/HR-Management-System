@@ -34,6 +34,35 @@
 .addBtn:hover {
   background: #4338ca;
 }
+.headerActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.escalateBtn {
+  background: #fff;
+  border: 1px solid #f59e0b;
+  color: #b45309;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.escalateBtn:hover {
+  background: #fffbeb;
+}
+.escalateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.escalatedTag {
+  margin-left: 6px;
+  color: #b45309;
+  font-size: 12px;
+}
 .muted {
   color: #9ca3af;
 }

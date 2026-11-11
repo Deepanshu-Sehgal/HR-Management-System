@@ -40,6 +40,11 @@ export const deleteTicket = createAsyncThunk("ticket/delete", async (id) => {
   return id;
 });
 
+export const runTicketEscalation = createAsyncThunk("ticket/escalate", async () => {
+  const res = await axios.post(`${URL}/run-escalation`);
+  return res.data;
+});
+
 const initialState = {
   items: [],
   stats: null,
