@@ -935,6 +935,24 @@
   cursor: pointer;
   color: #6b7280;
 }
+.drawerHeaderBtns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.removeBtn {
+  background: #fff;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.removeBtn:hover {
+  background: #fef2f2;
+}
 .drawerMeta {
   display: flex;
   flex-direction: column;

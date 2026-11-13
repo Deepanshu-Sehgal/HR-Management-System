@@ -37,6 +37,9 @@ const ticketSchema = new mongoose.Schema(
     dueAt: { type: Date },
     resolution: { type: String, default: "" },
     resolvedAt: { type: Date },
+    // Set by the SLA escalation sweep once a ticket is bumped for breaching SLA.
+    escalated: { type: Boolean, default: false },
+    escalatedAt: { type: Date },
     comments: { type: [commentSchema], default: [] },
   },
   { timestamps: true }

@@ -6,6 +6,7 @@ import {
   createTicket,
   updateTicket,
   addTicketComment,
+  runTicketEscalation,
 } from "../../redux/Slices/TicketSlice";
 import styles from "./Helpdesk.module.css";
 
@@ -106,6 +107,15 @@ function Helpdesk() {
     setComment("");
   };
 
+  const [escalating, setEscalating] = useState(false);
+  const handleEscalate = async () => {
+    setEscalating(true);
+    await dispatch(runTicketEscalation());
+    dispatch(fetchTickets(filter));
+    dispatch(fetchTicketStats());
+    setEscalating(false);
+  };
+
   // Export the currently-visible (searched + filtered) tickets to CSV.
   const exportCsv = () => {
     const cols = [
@@ -158,9 +168,19 @@ function Helpdesk() {
             resolution trail.
           </p>
         </div>
-        <button className={styles.addBtn} onClick={() => setShowForm((s) => !s)}>
-          {showForm ? "Cancel" : "+ New Ticket"}
-        </button>
+        <div className={styles.headerActions}>
+          <button
+            className={styles.escalateBtn}
+            onClick={handleEscalate}
+            disabled={escalating}
+            title="Auto-escalate SLA-breached open tickets now"
+          >
+            {escalating ? "Escalating…" : "⚡ Run escalation"}
+          </button>
+          <button className={styles.addBtn} onClick={() => setShowForm((s) => !s)}>
+            {showForm ? "Cancel" : "+ New Ticket"}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -340,6 +360,11 @@ function Helpdesk() {
                     <span className={`${styles.pri} ${styles["p_" + t.priority]}`}>
                       {t.priority}
                     </span>
+                    {t.escalated && (
+                      <span className={styles.escalatedTag} title="Auto-escalated after SLA breach">
+                        ⚡
+                      </span>
+                    )}
                   </td>
                   <td>
                     <span className={`${styles.status} ${styles["st_" + t.status.replace(/\s/g, "")]}`}>
