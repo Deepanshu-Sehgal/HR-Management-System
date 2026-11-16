@@ -320,14 +320,40 @@ exports.moveStage = async (req, res) => {
 exports.updateApplicationMeta = async (req, res) => {
   try {
     const { assignedTo, tags, rating } = req.body;
+    const by = req.body.by || "HR";
     const app = await JobApplication.findById(req.params.id);
     if (!app) return res.status(404).json({ message: "Application not found" });
 
-    if (assignedTo !== undefined) app.assignedTo = assignedTo;
+    // Audit owner changes on the activity timeline so reassignments are traceable.
+    if (assignedTo !== undefined && assignedTo !== app.assignedTo) {
+      const prev = app.assignedTo;
+      app.activities.push({
+        type: "system",
+        message: prev
+          ? `Reassigned from ${prev} to ${assignedTo || "Unassigned"}`
+          : `Assigned to ${assignedTo || "Unassigned"}`,
+        by,
+      });
+      app.assignedTo = assignedTo;
+    }
     if (Array.isArray(tags)) {
-      app.tags = [
+      const next = [
         ...new Set(tags.map((t) => String(t).trim()).filter(Boolean)),
       ].slice(0, 20);
+      // Log added/removed tags so labelling is reflected in the timeline.
+      const added = next.filter((t) => !app.tags.includes(t));
+      const removed = app.tags.filter((t) => !next.includes(t));
+      if (added.length || removed.length) {
+        const parts = [];
+        if (added.length) parts.push(`+${added.join(", +")}`);
+        if (removed.length) parts.push(`-${removed.join(", -")}`);
+        app.activities.push({
+          type: "system",
+          message: `Tags updated (${parts.join("  ")})`,
+          by,
+        });
+      }
+      app.tags = next;
     }
     if (rating !== undefined) app.rating = rating;
     await app.save();

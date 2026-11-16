@@ -82,6 +82,7 @@ function Pipeline() {
   const [overdueOnly, setOverdueOnly] = useState(false);
   const [fitFilter, setFitFilter] = useState(""); // "", Strong, Moderate, Weak
   const [ownerFilter, setOwnerFilter] = useState(""); // "", <recruiter>, __unassigned__
+  const [tagFilter, setTagFilter] = useState(""); // "", <tag>
   const [sortBy, setSortBy] = useState(""); // "", ai, sla, stage, rating
   const [emailCopied, setEmailCopied] = useState(false);
   const [tagInput, setTagInput] = useState("");
@@ -420,6 +421,15 @@ function Pipeline() {
     return [...set].sort();
   }, [columns]);
 
+  // Distinct tags across all leads, for the tag filter dropdown.
+  const allTags = useMemo(() => {
+    const set = new Set();
+    columns.forEach((c) =>
+      c.applications.forEach((a) => (a.tags || []).forEach((t) => t && set.add(t)))
+    );
+    return [...set].sort();
+  }, [columns]);
+
   const filterApps = (apps) =>
     apps.filter((a) => {
       if (overdueOnly && !isOverdue(a.dueAt)) return false;
@@ -427,11 +437,14 @@ function Pipeline() {
       if (ownerFilter === "__unassigned__" && a.assignedTo) return false;
       if (ownerFilter && ownerFilter !== "__unassigned__" && a.assignedTo !== ownerFilter)
         return false;
+      if (tagFilter && !(a.tags || []).includes(tagFilter)) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
         return (
           (a.applicantName || "").toLowerCase().includes(q) ||
-          (a.jobTitle || "").toLowerCase().includes(q)
+          (a.jobTitle || "").toLowerCase().includes(q) ||
+          (a.email || "").toLowerCase().includes(q) ||
+          (a.tags || []).some((t) => t.toLowerCase().includes(q))
         );
       }
       return true;
@@ -725,6 +738,21 @@ function Pipeline() {
             </option>
           ))}
         </select>
+        {allTags.length > 0 && (
+          <select
+            className={styles.fitSelect}
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            title="Filter by tag"
+          >
+            <option value="">All tags</option>
+            {allTags.map((t) => (
+              <option key={t} value={t}>
+                🏷 {t}
+              </option>
+            ))}
+          </select>
+        )}
         <select
           className={styles.fitSelect}
           value={sortBy}
@@ -737,7 +765,7 @@ function Pipeline() {
           <option value="stage">Sort: Time in stage</option>
           <option value="rating">Sort: Rating</option>
         </select>
-        {(search || overdueOnly || fitFilter || ownerFilter || sortBy) && (
+        {(search || overdueOnly || fitFilter || ownerFilter || tagFilter || sortBy) && (
           <button
             className={styles.clearBtn}
             onClick={() => {
@@ -745,6 +773,7 @@ function Pipeline() {
               setOverdueOnly(false);
               setFitFilter("");
               setOwnerFilter("");
+              setTagFilter("");
               setSortBy("");
             }}
           >
