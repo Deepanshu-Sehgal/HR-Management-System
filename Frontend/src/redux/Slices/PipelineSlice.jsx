@@ -68,6 +68,14 @@ export const enrollApplication = createAsyncThunk(
   }
 );
 
+export const unenrollApplication = createAsyncThunk(
+  "pipeline/unenroll",
+  async ({ applicationId, by }) => {
+    await axios.patch(`${PIPELINES_URL}/applications/${applicationId}/unenroll`, { by });
+    return applicationId;
+  }
+);
+
 export const moveStage = createAsyncThunk(
   "pipeline/moveStage",
   async ({ applicationId, stageKey, note, by }) => {
@@ -301,6 +309,16 @@ const PipelineSlice = createSlice({
       })
       .addCase(enrollApplication.fulfilled, (state, action) => {
         relocate(state, action.payload);
+      })
+      .addCase(unenrollApplication.fulfilled, (state, action) => {
+        const now = Date.now();
+        state.columns.forEach((col) => {
+          col.applications = col.applications.filter((a) => a._id !== action.payload);
+          col.count = col.applications.length;
+          col.overdueCount = col.applications.filter(
+            (a) => a.dueAt && new Date(a.dueAt).getTime() < now
+          ).length;
+        });
       })
       .addCase(createPipeline.fulfilled, (state, action) => {
         state.pipelines.push(action.payload);

@@ -23,6 +23,7 @@ const pipelineController = require("./controllers/pipelineController");
 const interviewRoutes = require("./routes/interviewRoutes");
 const onboardingRoutes = require("./routes/onboardingRoutes");
 const ticketRoutes = require("./routes/ticketRoutes");
+const ticketController = require("./controllers/ticketController");
 const offerRoutes = require("./routes/offerRoutes");
 const offerController = require("./controllers/offerController");
 const recruitmentAnalyticsRoutes = require("./routes/recruitmentAnalyticsRoutes");
@@ -177,6 +178,12 @@ if (sweepMinutes > 0) {
     offerController.runExpirySweep().catch((err) =>
       logger.error(`Scheduled offer expiry sweep failed: ${err.message}`)
     );
+    // Auto-escalate SLA-breached helpdesk tickets.
+    ticketController.runEscalationSweep().catch((err) =>
+      logger.error(`Scheduled ticket escalation sweep failed: ${err.message}`)
+    );
   }, sweepMinutes * 60 * 1000);
-  logger.info(`Pipeline SLA + offer expiry sweep scheduled every ${sweepMinutes} minute(s)`);
+  logger.info(
+    `Pipeline SLA + offer expiry + ticket escalation sweep scheduled every ${sweepMinutes} minute(s)`
+  );
 }

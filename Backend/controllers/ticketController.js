@@ -181,3 +181,51 @@ exports.getStats = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// ----- SLA auto-escalation (scheduled) -----
+const NEXT_PRIORITY = { Low: "Medium", Medium: "High", High: "Urgent" };
+
+// Bump the priority of open/in-progress tickets that have breached SLA and
+// haven't been escalated yet. Resets dueAt to the new, tighter SLA and logs a
+// comment. Runs on the shared sweep interval. Safe to call repeatedly.
+async function runEscalationSweep() {
+  const now = new Date();
+  const breached = await Ticket.find({
+    status: { $in: ["Open", "In Progress"] },
+    escalated: { $ne: true },
+    dueAt: { $ne: null, $lt: now },
+  });
+  let escalated = 0;
+  for (const ticket of breached) {
+    try {
+      const next = NEXT_PRIORITY[ticket.priority];
+      ticket.escalated = true;
+      ticket.escalatedAt = now;
+      if (next) {
+        ticket.priority = next;
+        ticket.dueAt = dueFromPriority(next);
+      }
+      ticket.comments.push({
+        message: `SLA breached — auto-escalated${next ? ` to ${next} priority` : ""}.`,
+        by: "system",
+        at: now,
+      });
+      await ticket.save();
+      escalated += 1;
+    } catch (err) {
+      logger.error(`Ticket escalation error for ${ticket._id}: ${err.message}`);
+    }
+  }
+  if (escalated) logger.info(`Helpdesk escalation sweep: ${escalated} ticket(s) escalated`);
+  return { escalated, scanned: breached.length };
+}
+exports.runEscalationSweep = runEscalationSweep;
+
+exports.triggerEscalation = async (req, res) => {
+  try {
+    const result = await runEscalationSweep();
+    res.status(200).json({ message: "Escalation sweep complete", ...result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
