@@ -83,6 +83,7 @@ function Pipeline() {
   const [fitFilter, setFitFilter] = useState(""); // "", Strong, Moderate, Weak
   const [ownerFilter, setOwnerFilter] = useState(""); // "", <recruiter>, __unassigned__
   const [tagFilter, setTagFilter] = useState(""); // "", <tag>
+  const [copiedCount, setCopiedCount] = useState(null); // transient "copied N" feedback
   const [sortBy, setSortBy] = useState(""); // "", ai, sla, stage, rating
   const [emailCopied, setEmailCopied] = useState(false);
   const [tagInput, setTagInput] = useState("");
@@ -525,6 +526,41 @@ function Pipeline() {
     URL.revokeObjectURL(url);
   };
 
+  // Copy the emails of the currently-visible (filtered) leads to the clipboard
+  // as a comma-separated list, ready to paste into a bulk-outreach "To" field.
+  const copyEmails = async () => {
+    const emails = [
+      ...new Set(
+        columns.flatMap((col) =>
+          filterApps(col.applications)
+            .map((a) => (a.email || "").trim())
+            .filter(Boolean)
+        )
+      ),
+    ];
+    if (!emails.length) {
+      setCopiedCount(0);
+      setTimeout(() => setCopiedCount(null), 2500);
+      return;
+    }
+    const text = emails.join(", ");
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback for browsers without async clipboard access.
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setCopiedCount(emails.length);
+    setTimeout(() => setCopiedCount(null), 2500);
+  };
+
   // ---- Native drag & drop between columns ----
   const findApp = (id) => {
     for (const col of columns) {
@@ -782,6 +818,17 @@ function Pipeline() {
         )}
         <button className={styles.exportBtn} onClick={exportCsv}>
           ⬇ Export CSV
+        </button>
+        <button
+          className={styles.exportBtn}
+          onClick={copyEmails}
+          title="Copy visible leads' emails for bulk outreach"
+        >
+          {copiedCount == null
+            ? "✉ Copy emails"
+            : copiedCount === 0
+            ? "No emails"
+            : `✓ Copied ${copiedCount}`}
         </button>
         <span className={styles.leadCount}>
           {columns.reduce((s, c) => s + filterApps(c.applications).length, 0)} of{" "}
