@@ -29,3 +29,4 @@ test is done.
 | `broken_lua.lua` | Lua | Missing `end` on function; unclosed table `{` |
 | `broken_r.R` | R | Missing `)` on `paste`/`c` calls |
 | `broken_perl.pl` | Perl | Missing semicolon; unclosed list; missing brace |
+| `broken_scala.scala` | Scala | Missing `)` on `println`/`List`; unclosed object brace |
