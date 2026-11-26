@@ -27,6 +27,8 @@ const ticketController = require("./controllers/ticketController");
 const offerRoutes = require("./routes/offerRoutes");
 const offerController = require("./controllers/offerController");
 const recruitmentAnalyticsRoutes = require("./routes/recruitmentAnalyticsRoutes");
+const celebrationRoutes = require("./routes/celebrationRoutes");
+const celebrationController = require("./controllers/celebrationController");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -131,6 +133,7 @@ app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/offers", offerRoutes);
 app.use("/api/recruitment-analytics", recruitmentAnalyticsRoutes);
+app.use("/api/celebrations", celebrationRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
@@ -182,8 +185,12 @@ if (sweepMinutes > 0) {
     ticketController.runEscalationSweep().catch((err) =>
       logger.error(`Scheduled ticket escalation sweep failed: ${err.message}`)
     );
+    // Auto-send birthday & work-anniversary greetings for today's occasions.
+    celebrationController.runCelebrationSweep().catch((err) =>
+      logger.error(`Scheduled celebration sweep failed: ${err.message}`)
+    );
   }, sweepMinutes * 60 * 1000);
   logger.info(
-    `Pipeline SLA + offer expiry + ticket escalation sweep scheduled every ${sweepMinutes} minute(s)`
+    `Pipeline SLA + offer expiry + ticket escalation + celebration sweep scheduled every ${sweepMinutes} minute(s)`
   );
 }

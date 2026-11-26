@@ -29,6 +29,7 @@ const Dashboard = () => {
     "/dashboard/attendance": "Attendance",
     "/dashboard/leaves": "Leaves",
     "/dashboard/onboarding": "Employee Onboarding",
+    "/dashboard/celebrations": "Employee Celebrations",
     "/dashboard/helpdesk": "HR Helpdesk",
     "/dashboard/ai-assistant": "AI Assistant",
     "/dashboard/hr-management": "HR Management",
@@ -188,6 +189,24 @@ const Dashboard = () => {
               }`}
             />
             Onboarding
+          </Link>
+          <Link
+            to="/dashboard/celebrations"
+            className={`${dash.menuItem} ${
+              location.pathname === "/dashboard/celebrations" ? dash.active : ""
+            }`}
+          >
+            {location.pathname === "/dashboard/celebrations" && (
+              <img src={Leftmenu} alt="Selected" className={dash.leftBar} />
+            )}
+            <img
+              src={Notifications}
+              alt="Celebrations"
+              className={`${dash.icon} ${
+                location.pathname === "/dashboard/celebrations" ? dash.activeIcon : ""
+              }`}
+            />
+            Celebrations
           </Link>
         </div>
 

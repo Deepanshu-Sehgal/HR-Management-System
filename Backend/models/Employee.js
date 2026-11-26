@@ -52,6 +52,12 @@ const EmployeeSchema = new mongoose.Schema({
   task: {
     type: String,
   },
+  // Optional date of birth, used by the Employee Celebrations module to
+  // detect upcoming birthdays. Additive / non-breaking: existing records
+  // without it simply have no birthday tracked.
+  dateOfBirth: {
+    type: Date,
+  },
   attendanceRecords: [
     {
       date: {
