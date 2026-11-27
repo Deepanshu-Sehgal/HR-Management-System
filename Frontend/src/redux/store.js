@@ -19,6 +19,7 @@ import onboarding from "./Slices/OnboardingSlice";
 import ticket from "./Slices/TicketSlice";
 import offer from "./Slices/OfferSlice";
 import recruitmentAnalytics from "./Slices/RecruitmentAnalyticsSlice";
+import celebrations from "./Slices/CelebrationSlice";
 import { CandidateApi } from "./Services/CandidateApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { EmployeeApi } from "./Services/EmployeeApi";
@@ -46,6 +47,7 @@ export const store = configureStore({
     ticket: ticket,
     offer: offer,
     recruitmentAnalytics: recruitmentAnalytics,
+    celebrations: celebrations,
     [CandidateApi.reducerPath]: CandidateApi.reducer,
     [EmployeeApi.reducerPath]: EmployeeApi.reducer,
     [LeaveApi.reducerPath]: LeaveApi.reducer,

@@ -13,6 +13,7 @@ const jobOpeningRoutes = require("./routes/jobOpeningRoutes");
 const jobApplicationRoutes = require("./routes/jobApplicationRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
 const documentRoutes = require("./routes/documentRoutes");
+const documentController = require("./controllers/documentController");
 const attendanceAnalyticsRoutes = require("./routes/attendanceAnalyticsRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const reimbursementRoutes = require("./routes/reimbursementRoutes");
@@ -27,6 +28,8 @@ const ticketController = require("./controllers/ticketController");
 const offerRoutes = require("./routes/offerRoutes");
 const offerController = require("./controllers/offerController");
 const recruitmentAnalyticsRoutes = require("./routes/recruitmentAnalyticsRoutes");
+const celebrationRoutes = require("./routes/celebrationRoutes");
+const celebrationController = require("./controllers/celebrationController");
 const cors = require("cors");
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -131,6 +134,7 @@ app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/offers", offerRoutes);
 app.use("/api/recruitment-analytics", recruitmentAnalyticsRoutes);
+app.use("/api/celebrations", celebrationRoutes);
 app.use("/api/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/reports", reportRoutes);
 
@@ -182,8 +186,16 @@ if (sweepMinutes > 0) {
     ticketController.runEscalationSweep().catch((err) =>
       logger.error(`Scheduled ticket escalation sweep failed: ${err.message}`)
     );
+    // Auto-send birthday & work-anniversary greetings for today's occasions.
+    celebrationController.runCelebrationSweep().catch((err) =>
+      logger.error(`Scheduled celebration sweep failed: ${err.message}`)
+    );
+    // Auto-email reminders for documents expiring soon or already expired.
+    documentController.runExpiryReminderSweep().catch((err) =>
+      logger.error(`Scheduled document expiry sweep failed: ${err.message}`)
+    );
   }, sweepMinutes * 60 * 1000);
   logger.info(
-    `Pipeline SLA + offer expiry + ticket escalation sweep scheduled every ${sweepMinutes} minute(s)`
+    `Pipeline SLA + offer expiry + ticket escalation + celebration + document expiry sweep scheduled every ${sweepMinutes} minute(s)`
   );
 }

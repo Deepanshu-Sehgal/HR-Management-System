@@ -15,6 +15,7 @@ import Payroll from "./Components/Pages/Payroll";
 import Recruitment from "./Components/Pages/Recruitment";
 import Pipeline from "./Components/Pages/Pipeline";
 import Onboarding from "./Components/Pages/Onboarding";
+import Celebrations from "./Components/Pages/Celebrations";
 import Helpdesk from "./Components/Pages/Helpdesk";
 import RecruitmentAnalytics from "./Components/Pages/RecruitmentAnalytics";
 import Announcements from "./Components/Pages/Announcements";
@@ -56,6 +57,7 @@ function App() {
           <Route path="pipeline" element={<Pipeline />} />
           <Route path="recruitment-analytics" element={<RecruitmentAnalytics />} />
           <Route path="onboarding" element={<Onboarding />} />
+          <Route path="celebrations" element={<Celebrations />} />
           <Route path="helpdesk" element={<Helpdesk />} />
           <Route path="announcements" element={<Announcements />} />
           <Route path="documents" element={<Documents />} />
