@@ -24,9 +24,46 @@ export const searchDocuments = createAsyncThunk(
   }
 );
 
+export const fetchExpiringDocuments = createAsyncThunk(
+  "document/fetchExpiring",
+  async (days = 30) => {
+    const response = await axios.get(`${API_BASE_URL}/documents/expiring`, {
+      params: { days },
+    });
+    return response.data;
+  }
+);
+
+export const fetchExpiryStats = createAsyncThunk(
+  "document/expiryStats",
+  async () => {
+    const response = await axios.get(`${API_BASE_URL}/documents/expiry-stats`);
+    return response.data;
+  }
+);
+
+export const sendDocumentReminder = createAsyncThunk(
+  "document/sendReminder",
+  async (id) => {
+    const response = await axios.post(`${API_BASE_URL}/documents/${id}/send-reminder`);
+    return { id, ...response.data };
+  }
+);
+
+export const runDocumentExpirySweep = createAsyncThunk(
+  "document/runExpirySweep",
+  async () => {
+    const response = await axios.post(`${API_BASE_URL}/documents/run-expiry-sweep`);
+    return response.data;
+  }
+);
+
 const initialState = {
   documents: [],
   searchResults: [],
+  expiring: [],
+  expiryStats: null,
+  sendingReminderId: null,
   loading: false,
   error: null,
 };
@@ -53,6 +90,23 @@ const DocumentSlice = createSlice({
       })
       .addCase(searchDocuments.fulfilled, (state, action) => {
         state.searchResults = action.payload;
+      })
+      .addCase(fetchExpiringDocuments.fulfilled, (state, action) => {
+        state.expiring = action.payload;
+      })
+      .addCase(fetchExpiryStats.fulfilled, (state, action) => {
+        state.expiryStats = action.payload;
+      })
+      .addCase(sendDocumentReminder.pending, (state, action) => {
+        state.sendingReminderId = action.meta.arg;
+      })
+      .addCase(sendDocumentReminder.fulfilled, (state, action) => {
+        state.sendingReminderId = null;
+        const item = state.expiring.find((d) => d._id === action.payload.id);
+        if (item) item.reminderSent = true;
+      })
+      .addCase(sendDocumentReminder.rejected, (state) => {
+        state.sendingReminderId = null;
       });
   },
 });
